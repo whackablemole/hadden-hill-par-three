@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoundStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  rounds    Round[]
+}
+
+model CourseHoleDefinition {
+  id          Int       @id
+  lengthYards Int
+  strokeIndex Int       @unique
+  par         Int       @default(3)
+  holeEntries HoleEntry[]
+}
+
+model Round {
+  id                   String      @id @default(cuid())
+  userId               String
+  playedOn             DateTime
+  targetHoleCount      Int
+  status               RoundStatus @default(IN_PROGRESS)
+  completedAt          DateTime?
+  totalStrokes         Int         @default(0)
+  totalPutts           Int         @default(0)
+  averagePuttsPerHole  Float       @default(0)
+  totalBirdies         Int         @default(0)
+  totalPars            Int         @default(0)
+  totalBogeys          Int         @default(0)
+  totalDoubleBogeys    Int         @default(0)
+  totalTripleBogeyPlus Int         @default(0)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holeEntries          HoleEntry[]
+
+  @@index([userId])
+}
+
+model HoleEntry {
+  id                String   @id @default(cuid())
+  roundId           String
+  holeSequence      Int
+  baseHoleId        Int
+  strokes           Int
+  penalties         Int
+  bunkers           Int
+  putts             Int
+  greenInRegulation Boolean
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  round             Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  courseHole        CourseHoleDefinition @relation(fields: [baseHoleId], references: [id], onDelete: Restrict)
+
+  @@unique([roundId, holeSequence])
+  @@index([roundId])
+}
