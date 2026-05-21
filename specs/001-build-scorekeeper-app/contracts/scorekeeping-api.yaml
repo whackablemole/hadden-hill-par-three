@@ -1,0 +1,329 @@
+openapi: 3.1.0
+info:
+  title: Hadden Hill Scorekeeping API
+  version: 1.0.0
+  description: User-scoped API contract for live round scorekeeping and stats.
+servers:
+  - url: /api
+security:
+  - sessionAuth: []
+paths:
+  /course/holes:
+    get:
+      summary: Get canonical six-hole definitions
+      operationId: getCourseHoles
+      responses:
+        '200':
+          description: Hole definitions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [holes]
+                properties:
+                  holes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CourseHoleDefinition'
+  /rounds:
+    post:
+      summary: Create a new round for the authenticated user
+      operationId: createRound
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [playedOn, targetHoleCount]
+              properties:
+                playedOn:
+                  type: string
+                  format: date
+                targetHoleCount:
+                  type: integer
+                  enum: [6, 12, 18]
+      responses:
+        '201':
+          description: Round created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Round'
+  /rounds/{roundId}:
+    get:
+      summary: Get one round owned by authenticated user
+      operationId: getRound
+      parameters:
+        - $ref: '#/components/parameters/RoundId'
+      responses:
+        '200':
+          description: Round details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoundWithEntries'
+        '404':
+          description: Round not found or not owned by user
+    delete:
+      summary: Delete one round owned by authenticated user
+      operationId: deleteRound
+      parameters:
+        - $ref: '#/components/parameters/RoundId'
+      responses:
+        '204':
+          description: Round deleted
+        '404':
+          description: Round not found or not owned by user
+  /rounds/{roundId}/holes/{holeSequence}:
+    put:
+      summary: Create or update a hole entry for an in-progress round (idempotent)
+      operationId: upsertHoleEntry
+      parameters:
+        - $ref: '#/components/parameters/RoundId'
+        - name: holeSequence
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HoleEntryInput'
+      responses:
+        '200':
+          description: Hole entry saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoleEntry'
+        '400':
+          description: Invalid payload or sequence out of round range
+        '404':
+          description: Round not found or not owned by user
+        '409':
+          description: Round already completed
+  /rounds/{roundId}/complete:
+    post:
+      summary: Finalize an in-progress round and compute derived metrics
+      operationId: completeRound
+      parameters:
+        - $ref: '#/components/parameters/RoundId'
+      responses:
+        '200':
+          description: Round completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Round'
+        '400':
+          description: Round has missing hole entries
+        '404':
+          description: Round not found or not owned by user
+  /rounds/history:
+    get:
+      summary: List authenticated user's rounds
+      operationId: listRoundHistory
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [IN_PROGRESS, COMPLETED]
+      responses:
+        '200':
+          description: Round history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [rounds]
+                properties:
+                  rounds:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Round'
+  /stats/overall:
+    get:
+      summary: Get aggregate statistics for authenticated user
+      operationId: getOverallStats
+      responses:
+        '200':
+          description: Aggregate stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatsSummary'
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: authjs.session-token
+  parameters:
+    RoundId:
+      name: roundId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    CourseHoleDefinition:
+      type: object
+      required: [id, lengthYards, strokeIndex, par]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          maximum: 6
+        lengthYards:
+          type: integer
+          minimum: 1
+        strokeIndex:
+          type: integer
+          minimum: 1
+          maximum: 6
+        par:
+          type: integer
+          enum: [3]
+    HoleEntryInput:
+      type: object
+      required: [strokes, penalties, bunkers, putts, greenInRegulation]
+      properties:
+        strokes:
+          type: integer
+          minimum: 1
+        penalties:
+          type: integer
+          minimum: 0
+        bunkers:
+          type: integer
+          minimum: 0
+        putts:
+          type: integer
+          minimum: 0
+        greenInRegulation:
+          type: boolean
+    HoleEntry:
+      allOf:
+        - $ref: '#/components/schemas/HoleEntryInput'
+        - type: object
+          required: [id, roundId, holeSequence, baseHoleId]
+          properties:
+            id:
+              type: string
+            roundId:
+              type: string
+            holeSequence:
+              type: integer
+              minimum: 1
+            baseHoleId:
+              type: integer
+              minimum: 1
+              maximum: 6
+    Round:
+      type: object
+      required:
+        - id
+        - playedOn
+        - targetHoleCount
+        - status
+        - totalStrokes
+        - totalPutts
+        - averagePuttsPerHole
+        - totalBirdies
+        - totalPars
+        - totalBogeys
+        - totalDoubleBogeys
+        - totalTripleBogeyPlus
+      properties:
+        id:
+          type: string
+        playedOn:
+          type: string
+          format: date
+        targetHoleCount:
+          type: integer
+          enum: [6, 12, 18]
+        status:
+          type: string
+          enum: [IN_PROGRESS, COMPLETED]
+        totalStrokes:
+          type: integer
+          minimum: 0
+        totalPutts:
+          type: integer
+          minimum: 0
+        averagePuttsPerHole:
+          type: number
+        totalBirdies:
+          type: integer
+          minimum: 0
+        totalPars:
+          type: integer
+          minimum: 0
+        totalBogeys:
+          type: integer
+          minimum: 0
+        totalDoubleBogeys:
+          type: integer
+          minimum: 0
+        totalTripleBogeyPlus:
+          type: integer
+          minimum: 0
+    RoundWithEntries:
+      allOf:
+        - $ref: '#/components/schemas/Round'
+        - type: object
+          required: [holeEntries]
+          properties:
+            holeEntries:
+              type: array
+              items:
+                $ref: '#/components/schemas/HoleEntry'
+    UserStatsSummary:
+      type: object
+      required:
+        - roundsPlayed
+        - holesPlayed
+        - totalStrokes
+        - totalPutts
+        - averagePuttsPerHole
+        - totalBirdies
+        - totalPars
+        - totalBogeys
+        - totalDoubleBogeys
+        - totalTripleBogeyPlus
+      properties:
+        roundsPlayed:
+          type: integer
+          minimum: 0
+        holesPlayed:
+          type: integer
+          minimum: 0
+        totalStrokes:
+          type: integer
+          minimum: 0
+        totalPutts:
+          type: integer
+          minimum: 0
+        averagePuttsPerHole:
+          type: number
+        totalBirdies:
+          type: integer
+          minimum: 0
+        totalPars:
+          type: integer
+          minimum: 0
+        totalBogeys:
+          type: integer
+          minimum: 0
+        totalDoubleBogeys:
+          type: integer
+          minimum: 0
+        totalTripleBogeyPlus:
+          type: integer
+          minimum: 0
