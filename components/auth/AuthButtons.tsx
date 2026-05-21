@@ -54,36 +54,21 @@ export function AuthButtons() {
 	const initials = getInitials( session.user.name, session.user.email );
 
 	return (
-		<div className="flex items-center gap-2">
-			<div className="hidden items-center gap-2 md:flex">
-				<span className="text-sm text-slate-700">{ email }</span>
-				<button
-					className="rounded border border-slate-300 px-3 py-2 text-sm"
-					onClick={ handleSignOut }
-					type="button"
-				>
-					Sign out
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<button className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400" type="button" aria-label="Open account menu">
+					<Avatar>
+						<AvatarImage src={ session.user.image ?? undefined } alt={ displayName } />
+						<AvatarFallback>{ initials }</AvatarFallback>
+					</Avatar>
 				</button>
-			</div>
-
-			<div className="md:hidden">
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<button className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400" type="button" aria-label="Open account menu">
-							<Avatar>
-								<AvatarImage src={ session.user.image ?? undefined } alt={ displayName } />
-								<AvatarFallback>{ initials }</AvatarFallback>
-							</Avatar>
-						</button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuText className="font-medium text-slate-800">{ displayName }</DropdownMenuText>
-						<DropdownMenuText>{ email }</DropdownMenuText>
-						<DropdownMenuSeparator className="my-1 h-px bg-slate-200" />
-						<DropdownMenuItem onSelect={ handleSignOut }>Sign out</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			</div>
-		</div>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end">
+				<DropdownMenuText className="font-medium text-slate-800">{ displayName }</DropdownMenuText>
+				<DropdownMenuText>{ email }</DropdownMenuText>
+				<DropdownMenuSeparator className="my-1 h-px bg-slate-200" />
+				<DropdownMenuItem onSelect={ handleSignOut }>Sign out</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }
