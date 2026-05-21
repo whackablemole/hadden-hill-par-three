@@ -30,7 +30,7 @@ export function DeleteRoundButton( { roundId, onDeleted }: DeleteRoundButtonProp
 	return (
 		<>
 			<button
-				className="rounded border border-red-300 px-3 py-1 text-sm text-red-700"
+				className="w-full rounded bg-red-700 px-3 py-2 text-sm text-white sm:w-auto"
 				type="button"
 				onClick={ () => setIsDialogOpen( true ) }
 				disabled={ isDeleting }

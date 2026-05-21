@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import { DeleteRoundButton } from "@/components/stats/DeleteRoundButton";
 import { RoundSummaryCard } from "@/components/stats/RoundSummaryCard";
 
 interface RoundSummary {
@@ -69,15 +68,9 @@ export default function RoundHistoryPage() {
 			{ rounds.length === 0 ? <p>No rounds yet.</p> : null }
 			<div className="space-y-3">
 				{ rounds.map( ( round ) => (
-					<div className="flex flex-col gap-2" key={ round.id }>
-						<RoundSummaryCard round={ round } />
-						<div className="flex gap-2">
-							<Link className="rounded border border-slate-300 px-3 py-1 text-sm" href={ `/rounds/${ round.id }` }>
-								Open
-							</Link>
-							<DeleteRoundButton roundId={ round.id } onDeleted={ loadHistory } />
-						</div>
-					</div>
+					<Link className="block rounded outline-none transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-emerald-600" href={ `/rounds/${ round.id }` } key={ round.id }>
+						<RoundSummaryCard round={ round } compact />
+					</Link>
 				) ) }
 			</div>
 		</main>

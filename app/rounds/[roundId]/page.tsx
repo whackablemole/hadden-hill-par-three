@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { HoleEntryForm, HoleEntryPayload } from "@/components/round-entry/HoleEntryForm";
 import { RoundProgress } from "@/components/round-entry/RoundProgress";
+import { DeleteRoundButton } from "@/components/stats/DeleteRoundButton";
 import { RoundSummaryCard } from "@/components/stats/RoundSummaryCard";
 import { saveHoleEntry } from "@/lib/rounds/saveHoleEntry";
 
@@ -48,6 +49,7 @@ export default function RoundDetailPage() {
 	const [ round, setRound ] = useState<RoundData | null>( null );
 	const [ error, setError ] = useState<string | null>( null );
 	const [ selectedHole, setSelectedHole ] = useState( 1 );
+	const router = useRouter();
 
 	const loadRound = useCallback( async () => {
 		if ( !session?.user ) {
@@ -146,7 +148,9 @@ export default function RoundDetailPage() {
 		<main className="mx-auto max-w-3xl space-y-4 p-6">
 			<h1 className="text-2xl font-bold">Round details</h1>
 
-			<RoundProgress current={ Math.min( selectedHole, round.targetHoleCount ) } total={ round.targetHoleCount } />
+			{ round.status === "IN_PROGRESS" ? (
+				<RoundProgress current={ Math.min( selectedHole, round.targetHoleCount ) } total={ round.targetHoleCount } />
+			) : null }
 
 			{ round.status === "IN_PROGRESS" ? (
 				<section className="space-y-3">
@@ -184,13 +188,21 @@ export default function RoundDetailPage() {
 
 					<HoleEntryForm initialPayload={ initialHolePayload } onSave={ onSave } />
 
-					<button className="rounded bg-emerald-700 px-4 py-2 text-white" onClick={ onComplete } type="button">
+					<button className="w-full rounded bg-emerald-700 px-4 py-2 text-white" onClick={ onComplete } type="button">
 						Complete round
 					</button>
 				</section>
 			) : null }
 
-			<RoundSummaryCard round={ round } />
+			{ round.status !== "IN_PROGRESS" ? <RoundSummaryCard round={ round } /> : null }
+			<div className="flex justify-end">
+				<DeleteRoundButton
+					roundId={ round.id }
+					onDeleted={ () => {
+						router.push( "/rounds/history" );
+					} }
+				/>
+			</div>
 		</main>
 	);
 }
