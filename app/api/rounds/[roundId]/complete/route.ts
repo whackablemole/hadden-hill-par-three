@@ -6,47 +6,47 @@ import { errorResponse } from "@/lib/rounds/http";
 import { getAuthenticatedUser, getOwnedRound } from "@/lib/rounds/ownership";
 
 interface RouteContext {
-  params: {
-    roundId: string;
-  };
+	params: {
+		roundId: string;
+	};
 }
 
-export async function POST(_request: NextRequest, { params }: RouteContext) {
-  const user = await getAuthenticatedUser();
-  if (!user) {
-    return errorResponse(401, "UNAUTHORIZED", "Authentication is required.");
-  }
+export async function POST( _request: NextRequest, { params }: RouteContext ) {
+	const user = await getAuthenticatedUser();
+	if ( !user ) {
+		return errorResponse( 401, "UNAUTHORIZED", "Authentication is required." );
+	}
 
-  const round = await getOwnedRound(params.roundId, user.id);
-  if (!round) {
-    return errorResponse(404, "ROUND_NOT_FOUND", "Round not found.");
-  }
+	const round = await getOwnedRound( params.roundId, user.id );
+	if ( !round ) {
+		return errorResponse( 404, "ROUND_NOT_FOUND", "Round not found." );
+	}
 
-  if (round.holeEntries.length !== round.targetHoleCount) {
-    return errorResponse(400, "INCOMPLETE_ROUND", "All holes must be entered before completion.");
-  }
+	if ( round.holeEntries.length !== round.targetHoleCount ) {
+		return errorResponse( 400, "INCOMPLETE_ROUND", "All holes must be entered before completion." );
+	}
 
-  const stats = calculateRoundStats(
-    round.holeEntries.map((entry: { strokes: number; putts: number }) => ({
-      strokes: entry.strokes,
-      putts: entry.putts,
-    })),
-  );
+	const stats = calculateRoundStats(
+		round.holeEntries.map( ( entry: { strokes: number; putts: number } ) => ( {
+			strokes: entry.strokes,
+			putts: entry.putts,
+		} ) ),
+	);
 
-  const updated = await prisma.round.update({
-    where: { id: round.id },
-    data: {
-      status: "COMPLETED",
-      completedAt: new Date(),
-      ...stats,
-    },
-  });
+	const updated = await prisma.round.update( {
+		where: { id: round.id },
+		data: {
+			status: "COMPLETED",
+			completedAt: new Date(),
+			...stats,
+		},
+	} );
 
-  roundLogger.info({
-    action: "round.complete",
-    roundId: updated.id,
-    userId: user.id,
-  });
+	roundLogger.info( {
+		action: "round.complete",
+		roundId: updated.id,
+		userId: user.id,
+	} );
 
-  return NextResponse.json(updated);
+	return NextResponse.json( updated );
 }

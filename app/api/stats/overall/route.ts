@@ -4,11 +4,11 @@ import { errorResponse } from "@/lib/rounds/http";
 import { getAuthenticatedUser } from "@/lib/rounds/ownership";
 
 export async function GET() {
-  const user = await getAuthenticatedUser();
-  if (!user) {
-    return errorResponse(401, "UNAUTHORIZED", "Authentication is required.");
-  }
+	const user = await getAuthenticatedUser();
+	if ( !user ) {
+		return errorResponse( 401, "UNAUTHORIZED", "Authentication is required." );
+	}
 
-  const stats = await getUserStatsSummary(user.id);
-  return NextResponse.json(stats);
+	const stats = await getUserStatsSummary( user.id );
+	return NextResponse.json( stats );
 }
