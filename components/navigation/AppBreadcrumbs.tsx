@@ -73,7 +73,7 @@ function getSegmentLabel( segment: string, allSegments: string[] ) {
 		return "New Round";
 	}
 	if ( segment === "stats" ) {
-		return "Stats";
+		return "My Stats";
 	}
 	if ( allSegments[0] === "rounds" && allSegments[1] === segment && !staticRoundsSegments.has( segment ) ) {
 		return "Round";

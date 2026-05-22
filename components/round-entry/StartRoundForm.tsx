@@ -51,7 +51,7 @@ export function StartRoundForm() {
 			<div className="rounded border border-slate-200 bg-white p-4">
 				<p className="text-sm text-slate-700">Sign in with Google to start a round.</p>
 				<button
-					className="mt-3 rounded bg-slate-900 px-4 py-2 text-white"
+					className="mt-3 rounded bg-teal-700 px-4 py-2 text-white hover:bg-teal-800"
 					onClick={ () => signIn( "google", callbackUrl ? { callbackUrl } : undefined ) }
 					type="button"
 				>
@@ -66,7 +66,7 @@ export function StartRoundForm() {
 			<div>
 				<label className="mb-1 block text-sm font-medium">Date</label>
 				<input
-					className="w-full rounded border border-slate-300 px-3 py-2"
+					className="w-full rounded border border-teal-600 px-3 py-2"
 					type="date"
 					value={ playedOn }
 					onChange={ ( e ) => setPlayedOn( e.target.value ) }
@@ -76,7 +76,7 @@ export function StartRoundForm() {
 			<div>
 				<label className="mb-1 block text-sm font-medium">Total holes</label>
 				<select
-					className="w-full rounded border border-slate-300 px-3 py-2"
+					className="w-full rounded border border-teal-600 px-3 py-2"
 					value={ targetHoleCount }
 					onChange={ ( e ) => setTargetHoleCount( Number( e.target.value ) as 6 | 12 | 18 ) }
 				>
@@ -89,7 +89,7 @@ export function StartRoundForm() {
 			{ error ? <p className="text-sm text-red-600">{ error }</p> : null }
 
 			<button
-				className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-60"
+				className="rounded bg-teal-700 px-4 py-2 text-white hover:bg-teal-800 disabled:opacity-60"
 				type="submit"
 				disabled={ isSubmitting }
 			>

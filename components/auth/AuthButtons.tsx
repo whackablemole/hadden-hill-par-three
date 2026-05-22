@@ -40,7 +40,7 @@ export function AuthButtons() {
 	if ( !session?.user ) {
 		return (
 			<button
-				className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white"
+				className="rounded bg-teal-700 px-3 py-2 text-sm font-medium text-white hover:bg-teal-800"
 				onClick={ handleSignIn }
 				type="button"
 			>
@@ -56,7 +56,7 @@ export function AuthButtons() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<button className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400" type="button" aria-label="Open account menu">
+				<button className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500" type="button" aria-label="Open account menu">
 					<Avatar>
 						<AvatarImage src={ session.user.image ?? undefined } alt={ displayName } />
 						<AvatarFallback>{ initials }</AvatarFallback>

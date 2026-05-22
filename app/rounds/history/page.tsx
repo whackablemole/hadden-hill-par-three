@@ -52,7 +52,7 @@ export default function RoundHistoryPage() {
 				<h1 className="text-2xl font-bold">Round history</h1>
 				<p className="mt-2 text-slate-700">Sign in to view your round history.</p>
 				<button
-					className="mt-4 rounded bg-slate-900 px-4 py-2 text-white"
+					className="mt-4 rounded bg-teal-700 px-4 py-2 text-white hover:bg-teal-800"
 					onClick={ () => signIn( "google", callbackUrl ? { callbackUrl } : undefined ) }
 					type="button"
 				>
@@ -68,7 +68,7 @@ export default function RoundHistoryPage() {
 			{ rounds.length === 0 ? <p>No rounds yet.</p> : null }
 			<div className="space-y-3">
 				{ rounds.map( ( round ) => (
-					<Link className="block rounded outline-none transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-emerald-600" href={ `/rounds/${ round.id }` } key={ round.id }>
+					<Link className="block rounded outline-none transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-teal-600" href={ `/rounds/${ round.id }` } key={ round.id }>
 						<RoundSummaryCard round={ round } compact />
 					</Link>
 				) ) }

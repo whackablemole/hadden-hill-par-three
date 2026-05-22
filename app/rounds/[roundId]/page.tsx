@@ -112,7 +112,7 @@ export default function RoundDetailPage() {
 				<h1 className="text-2xl font-bold">Round details</h1>
 				<p className="mt-2 text-slate-700">Sign in to view round details.</p>
 				<button
-					className="mt-4 rounded bg-slate-900 px-4 py-2 text-white"
+					className="mt-4 rounded bg-teal-700 px-4 py-2 text-white hover:bg-teal-800"
 					onClick={ () => signIn( "google", callbackUrl ? { callbackUrl } : undefined ) }
 					type="button"
 				>
@@ -157,7 +157,7 @@ export default function RoundDetailPage() {
 					<div className="rounded border border-slate-200 bg-white p-3">
 						<div className="flex items-center justify-between">
 							<button
-								className="rounded border border-slate-300 p-2 text-lg disabled:opacity-40"
+								className="rounded border border-teal-600 p-2 text-lg text-teal-700 hover:bg-teal-50 disabled:opacity-40"
 								type="button"
 								onClick={ () => setSelectedHole( ( value ) => Math.max( 1, value - 1 ) ) }
 								disabled={ selectedHole <= 1 }
@@ -169,13 +169,13 @@ export default function RoundDetailPage() {
 								<p className="text-base font-semibold">Hole { selectedHole }</p>
 								<p className="text-sm text-slate-600">{ selectedHoleLength } yards</p>
 								{ enteredHoles.has( selectedHole ) ? (
-									<p className="text-xs text-emerald-700">Saved</p>
+									<p className="text-xs text-teal-700">Saved</p>
 								) : (
 									<p className="text-xs text-slate-500">Not saved</p>
 								) }
 							</div>
 							<button
-								className="rounded border border-slate-300 p-2 text-lg disabled:opacity-40"
+								className="rounded border border-teal-600 p-2 text-lg text-teal-700 hover:bg-teal-50 disabled:opacity-40"
 								type="button"
 								onClick={ () => setSelectedHole( ( value ) => Math.min( round.targetHoleCount, value + 1 ) ) }
 								disabled={ selectedHole >= round.targetHoleCount }
@@ -188,7 +188,7 @@ export default function RoundDetailPage() {
 
 					<HoleEntryForm initialPayload={ initialHolePayload } onSave={ onSave } />
 
-					<button className="w-full rounded bg-emerald-700 px-4 py-2 text-white" onClick={ onComplete } type="button">
+					<button className="w-full rounded bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800" onClick={ onComplete } type="button">
 						Complete round
 					</button>
 				</section>

@@ -12,6 +12,10 @@ interface RoundSummaryCardProps {
 		totalBogeys: number;
 		totalDoubleBogeys: number;
 		totalTripleBogeyPlus: number;
+		totalGir?: number;
+		holeEntries?: Array<{
+			greenInRegulation: boolean;
+		}>;
 	};
 	compact?: boolean;
 }
@@ -65,7 +69,7 @@ export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardPr
 	const statusLabel = isInProgress ? "In Progress" : round.status === "COMPLETED" ? "Completed" : round.status;
 	const statusClassName = isInProgress
 		? "bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-300"
-		: "bg-emerald-100 text-emerald-900 ring-1 ring-inset ring-emerald-300";
+		: "bg-teal-100 text-teal-900 ring-1 ring-inset ring-teal-300";
 	const titleDate = formatRoundTitleDate( round.playedOn );
 	const parRelativeLabel = getParRelativeLabel( round.totalStrokes, round.targetHoleCount );
 	const holePercentage = ( count: number ) => {
@@ -74,11 +78,14 @@ export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardPr
 		}
 		return ( count / round.targetHoleCount ) * 100;
 	};
+	const derivedGirCount = round.holeEntries?.filter( ( entry ) => entry.greenInRegulation ).length;
+	const totalGir = typeof round.totalGir === "number" ? round.totalGir : derivedGirCount;
 	const statCards = [
 		{ label: "Total strokes", value: round.totalStrokes },
 		{ label: "Total putts", value: round.totalPutts },
 		{ label: "Average putts/hole", value: round.averagePuttsPerHole.toFixed( 2 ) },
 		{ label: "Par relative", value: parRelativeLabel },
+		...( typeof totalGir === "number" ? [ { label: "GIR", value: totalGir, progressPercent: holePercentage( totalGir ) } ] : [] ),
 		{ label: "Birdies", value: round.totalBirdies, progressPercent: holePercentage( round.totalBirdies ) },
 		{ label: "Pars", value: round.totalPars, progressPercent: holePercentage( round.totalPars ) },
 		{ label: "Bogeys", value: round.totalBogeys, progressPercent: holePercentage( round.totalBogeys ) },
@@ -100,7 +107,7 @@ export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardPr
 						</div>
 					</div>
 					{ !isInProgress ? (
-						<div className="flex min-w-24 flex-col items-center justify-center rounded-md bg-emerald-700 px-4 py-3 text-center">
+						<div className="flex min-w-24 flex-col items-center justify-center rounded-md bg-teal-700 px-4 py-3 text-center">
 							<p className="text-3xl font-semibold leading-none text-white">{ round.totalStrokes }</p>
 							<p className="mt-1 text-xs font-medium text-slate-200">{ parRelativeLabel }</p>
 						</div>
@@ -130,7 +137,7 @@ export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardPr
 							<div className="mt-3">
 								<div className="h-2 w-full rounded-full bg-slate-200">
 									<div
-										className="h-2 rounded-full bg-emerald-600"
+										className="h-2 rounded-full bg-teal-600"
 										style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
 									/>
 								</div>

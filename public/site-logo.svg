@@ -1,0 +1,23 @@
+<svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">WM Caddy logo</title>
+  <desc id="desc">WM monogram mark in teal.</desc>
+
+  <g stroke="#0F766E" stroke-width="7" stroke-linecap="butt" stroke-linejoin="bevel">
+    <path d="M12 10L25 23" />
+    <path d="M25 23L32 16" />
+    <path d="M32 16L39 23" />
+    <path d="M39 23L52 10" />
+
+    <path d="M12 10V37" />
+    <path d="M52 10V37" />
+
+    <path d="M25 23V39" />
+    <path d="M39 23V39" />
+
+    <path d="M12 37L25 50" />
+    <path d="M52 37L39 50" />
+
+    <path d="M25 39L32 46L39 39" />
+    <path d="M27 47L32 52L37 47" />
+  </g>
+</svg>

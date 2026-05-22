@@ -40,7 +40,7 @@ export function HoleEntryForm( { initialPayload, onSave }: HoleEntryFormProps ) 
 				<span className="font-medium text-slate-700">{ label }</span>
 				<span className="relative inline-flex cursor-pointer items-center">
 					<input className="peer sr-only" type="checkbox" checked={ checked } onChange={ ( e ) => onChange( e.target.checked ) } />
-					<span className="h-6 w-11 rounded-full bg-slate-300 transition-colors peer-checked:bg-emerald-600" />
+					<span className="h-6 w-11 rounded-full bg-slate-300 transition-colors peer-checked:bg-teal-600" />
 					<span className="absolute left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
 				</span>
 			</label>
@@ -59,19 +59,19 @@ export function HoleEntryForm( { initialPayload, onSave }: HoleEntryFormProps ) 
 				<div className="mt-2 grid grid-cols-[48px_1fr_48px] items-center gap-2">
 					<button
 						type="button"
-						className="inline-flex h-12 w-12 items-center justify-center rounded border border-slate-300 text-slate-700 disabled:opacity-40"
+						className="inline-flex h-12 w-12 items-center justify-center rounded border border-teal-600 text-teal-700 hover:bg-teal-50 disabled:opacity-40"
 						onClick={ () => onChange( Math.max( min, value - 1 ) ) }
 						disabled={ value <= min }
 						aria-label={ `Decrease ${ label.toLowerCase() }` }
 					>
 						<MinusIcon className="h-5 w-5" />
 					</button>
-					<div className="flex h-12 items-center justify-center rounded border border-slate-300 text-lg font-semibold text-slate-900">
+					<div className="flex h-12 items-center justify-center rounded border border-teal-600 text-lg font-semibold text-slate-900">
 						{ value }
 					</div>
 					<button
 						type="button"
-						className="inline-flex h-12 w-12 items-center justify-center rounded border border-slate-300 text-slate-700"
+						className="inline-flex h-12 w-12 items-center justify-center rounded border border-teal-600 text-teal-700 hover:bg-teal-50"
 						onClick={ () => onChange( value + 1 ) }
 						aria-label={ `Increase ${ label.toLowerCase() }` }
 					>
@@ -93,7 +93,7 @@ export function HoleEntryForm( { initialPayload, onSave }: HoleEntryFormProps ) 
 				{ renderToggle( "Bunker", form.bunkers, ( checked ) => setForm( { ...form, bunkers: checked } ) ) }
 				{ renderToggle( "Green in regulation", form.greenInRegulation, ( checked ) => setForm( { ...form, greenInRegulation: checked } ) ) }
 			</div>
-			<button className="rounded bg-slate-900 px-3 py-2 text-white" type="submit" disabled={ isSaving }>
+			<button className="rounded bg-teal-700 px-3 py-2 text-white hover:bg-teal-800" type="submit" disabled={ isSaving }>
 				{ isSaving ? "Saving..." : "Save hole" }
 			</button>
 		</form>
