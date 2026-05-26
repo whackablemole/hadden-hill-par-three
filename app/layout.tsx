@@ -21,9 +21,25 @@ export default function RootLayout( {
 				<Providers>
 					<header className="border-b border-slate-200 bg-white">
 						<div className="mx-auto flex max-w-5xl items-center justify-between p-4">
-							<Link className="inline-flex items-center" href="/" aria-label="WM Caddy home">
-								<Image src="/wm-logo.svg" alt="WM Caddy" width={ 40 } height={ 40 } priority />
-							</Link>
+							<div className="flex items-center gap-6">
+								<Link className="inline-flex items-center" href="/" aria-label="WM Caddy home">
+									<Image src="/wm-logo.svg" alt="WM Caddy" width={ 40 } height={ 40 } priority />
+								</Link>
+								<nav className="hidden items-center gap-4 text-sm font-medium text-slate-700 sm:flex" aria-label="Desktop navigation">
+									<Link className="rounded px-2 py-1 hover:bg-slate-100 hover:text-teal-700" href="/">
+										Clubhouse
+									</Link>
+									<Link className="rounded px-2 py-1 hover:bg-slate-100 hover:text-teal-700" href="/rounds/new">
+										Start Round
+									</Link>
+									<Link className="rounded px-2 py-1 hover:bg-slate-100 hover:text-teal-700" href="/rounds/history">
+										History
+									</Link>
+									<Link className="rounded px-2 py-1 hover:bg-slate-100 hover:text-teal-700" href="/stats">
+										My Stats
+									</Link>
+								</nav>
+							</div>
 							<AuthButtons />
 						</div>
 					</header>

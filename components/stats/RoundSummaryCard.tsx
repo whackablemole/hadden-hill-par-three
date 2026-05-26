@@ -15,9 +15,11 @@ interface RoundSummaryCardProps {
 		totalGir?: number;
 		holeEntries?: Array<{
 			greenInRegulation: boolean;
+			putts?: number;
 		}>;
 	};
 	compact?: boolean;
+	hideHeader?: boolean;
 }
 
 function getOrdinalSuffix( day: number ) {
@@ -64,7 +66,7 @@ function getParRelativeLabel( totalStrokes: number, targetHoleCount: number ) {
 	return "E";
 }
 
-export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardProps ) {
+export function RoundSummaryCard( { round, compact = false, hideHeader = false }: RoundSummaryCardProps ) {
 	const isInProgress = round.status === "IN_PROGRESS";
 	const statusLabel = isInProgress ? "In Progress" : round.status === "COMPLETED" ? "Completed" : round.status;
 	const statusClassName = isInProgress
@@ -72,6 +74,7 @@ export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardPr
 		: "bg-teal-100 text-teal-900 ring-1 ring-inset ring-teal-300";
 	const titleDate = formatRoundTitleDate( round.playedOn );
 	const parRelativeLabel = getParRelativeLabel( round.totalStrokes, round.targetHoleCount );
+	const averageStrokesPerHole = round.targetHoleCount <= 0 ? 0 : round.totalStrokes / round.targetHoleCount;
 	const holePercentage = ( count: number ) => {
 		if ( round.targetHoleCount <= 0 ) {
 			return 0;
@@ -80,17 +83,42 @@ export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardPr
 	};
 	const derivedGirCount = round.holeEntries?.filter( ( entry ) => entry.greenInRegulation ).length;
 	const totalGir = typeof round.totalGir === "number" ? round.totalGir : derivedGirCount;
-	const statCards = [
+	const summaryStatCards = [
 		{ label: "Total strokes", value: round.totalStrokes },
+		{ label: "Average strokes/hole", value: averageStrokesPerHole.toFixed( 2 ) },
 		{ label: "Total putts", value: round.totalPutts },
 		{ label: "Average putts/hole", value: round.averagePuttsPerHole.toFixed( 2 ) },
 		{ label: "Par relative", value: parRelativeLabel },
 		...( typeof totalGir === "number" ? [ { label: "GIR", value: totalGir, progressPercent: holePercentage( totalGir ) } ] : [] ),
+	];
+	const scoreTypeStats = [
 		{ label: "Birdies", value: round.totalBirdies, progressPercent: holePercentage( round.totalBirdies ) },
 		{ label: "Pars", value: round.totalPars, progressPercent: holePercentage( round.totalPars ) },
 		{ label: "Bogeys", value: round.totalBogeys, progressPercent: holePercentage( round.totalBogeys ) },
 		{ label: "Double bogeys", value: round.totalDoubleBogeys, progressPercent: holePercentage( round.totalDoubleBogeys ) },
 		{ label: "Triple bogeys", value: round.totalTripleBogeyPlus, progressPercent: holePercentage( round.totalTripleBogeyPlus ) },
+	];
+	const puttBuckets = ( round.holeEntries ?? [] ).reduce(
+		( totals, entry ) => {
+			const putts = typeof entry.putts === "number" ? entry.putts : 0;
+			if ( putts <= 1 ) {
+				totals.one += 1;
+			} else if ( putts === 2 ) {
+				totals.two += 1;
+			} else if ( putts === 3 ) {
+				totals.three += 1;
+			} else {
+				totals.fourPlus += 1;
+			}
+			return totals;
+		},
+		{ one: 0, two: 0, three: 0, fourPlus: 0 },
+	);
+	const puttTypeStats = [
+		{ label: "One putts", value: puttBuckets.one, progressPercent: holePercentage( puttBuckets.one ) },
+		{ label: "Two putts", value: puttBuckets.two, progressPercent: holePercentage( puttBuckets.two ) },
+		{ label: "Three putts", value: puttBuckets.three, progressPercent: holePercentage( puttBuckets.three ) },
+		{ label: "4+ putts", value: puttBuckets.fourPlus, progressPercent: holePercentage( puttBuckets.fourPlus ) },
 	];
 
 	if ( compact ) {
@@ -119,17 +147,19 @@ export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardPr
 
 	return (
 		<section className="space-y-3">
-			<div className="rounded border border-slate-200 bg-white p-4">
-				<h3 className="font-semibold">{ titleDate }</h3>
-				<div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-					<span>{ round.targetHoleCount } holes</span>
-					<span className={ `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${ statusClassName }` }>
-						{ statusLabel }
-					</span>
+			{ !hideHeader ? (
+				<div className="rounded border border-slate-200 bg-white p-4">
+					<h3 className="font-semibold">{ titleDate }</h3>
+					<div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+						<span>{ round.targetHoleCount } holes</span>
+						<span className={ `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${ statusClassName }` }>
+							{ statusLabel }
+						</span>
+					</div>
 				</div>
-			</div>
+			) : null }
 			<div className="grid grid-cols-2 gap-3">
-				{ statCards.map( ( stat ) => (
+				{ summaryStatCards.map( ( stat ) => (
 					<article className="rounded border border-slate-200 bg-white p-4" key={ stat.label }>
 						<p className="text-sm text-slate-600">{ stat.label }</p>
 						<p className="mt-1 text-2xl font-semibold text-slate-900">{ stat.value }</p>
@@ -147,6 +177,48 @@ export function RoundSummaryCard( { round, compact = false }: RoundSummaryCardPr
 					</article>
 				) ) }
 			</div>
+			<article className="rounded border border-slate-200 bg-white p-4">
+				<h4 className="text-sm font-semibold text-slate-800">Score breakdown</h4>
+				<div className="mt-3 space-y-3">
+					{ scoreTypeStats.map( ( stat ) => (
+						<div className="grid grid-cols-[6.75rem_auto_1fr] items-center gap-4" key={ stat.label }>
+							<p className="text-sm text-slate-700">{ stat.label }</p>
+							<p className="text-sm font-semibold text-slate-900">{ stat.value }</p>
+							<div>
+								<div className="h-2 w-full rounded-full bg-slate-200">
+									<div
+										className="h-2 rounded-full bg-teal-600"
+										style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
+									/>
+								</div>
+								<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
+							</div>
+						</div>
+					) ) }
+				</div>
+			</article>
+			{ round.holeEntries && round.holeEntries.length > 0 ? (
+				<article className="rounded border border-slate-200 bg-white p-4">
+					<h4 className="text-sm font-semibold text-slate-800">Putt breakdown</h4>
+					<div className="mt-3 space-y-3">
+						{ puttTypeStats.map( ( stat ) => (
+							<div className="grid grid-cols-[6.75rem_auto_1fr] items-center gap-4" key={ stat.label }>
+								<p className="text-sm text-slate-700">{ stat.label }</p>
+								<p className="text-sm font-semibold text-slate-900">{ stat.value }</p>
+								<div>
+									<div className="h-2 w-full rounded-full bg-slate-200">
+										<div
+											className="h-2 rounded-full bg-teal-600"
+											style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
+										/>
+									</div>
+									<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
+								</div>
+							</div>
+						) ) }
+					</div>
+				</article>
+			) : null }
 		</section>
 	);
 }

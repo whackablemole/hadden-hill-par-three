@@ -9,6 +9,7 @@ import { RoundProgress } from "@/components/round-entry/RoundProgress";
 import { DeleteRoundButton } from "@/components/stats/DeleteRoundButton";
 import { RoundSummaryCard } from "@/components/stats/RoundSummaryCard";
 import { saveHoleEntry } from "@/lib/rounds/saveHoleEntry";
+import { classifyScore } from "@/lib/scoring/calculateRoundStats";
 
 interface RoundData {
 	id: string;
@@ -42,6 +43,54 @@ const holeLengthByBaseHole: Record<number, number> = {
 	6: 105,
 };
 
+function getOrdinalSuffix( day: number ) {
+	if ( day >= 11 && day <= 13 ) {
+		return "th";
+	}
+
+	const lastDigit = day % 10;
+	if ( lastDigit === 1 ) {
+		return "st";
+	}
+	if ( lastDigit === 2 ) {
+		return "nd";
+	}
+	if ( lastDigit === 3 ) {
+		return "rd";
+	}
+
+	return "th";
+}
+
+function formatRoundHeaderDate( playedOn: string ) {
+	const date = new Date( playedOn );
+	const weekday = new Intl.DateTimeFormat( "en-GB", { weekday: "short", timeZone: "UTC" } ).format( date );
+	const day = date.getUTCDate();
+	const month = new Intl.DateTimeFormat( "en-GB", { month: "long", timeZone: "UTC" } ).format( date );
+	const year = date.getUTCFullYear();
+
+	return `${ weekday } ${ day }${ getOrdinalSuffix( day ) } ${ month } ${ year }`;
+}
+
+function getScoreStyle( strokes: number ) {
+	const scoreType = classifyScore( strokes, 3 );
+
+	if ( scoreType === "birdie" ) {
+		return "inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-teal-700 bg-teal-600 text-sm font-bold text-white sm:h-10 sm:w-10 sm:text-base";
+	}
+
+	if ( scoreType === "par" ) {
+		return "inline-flex h-8 w-8 items-center justify-center text-sm font-bold text-slate-900 sm:h-10 sm:w-10 sm:text-base";
+	}
+
+	if ( scoreType === "bogey" ) {
+		return "inline-flex h-8 w-8 items-center justify-center rounded-sm border-2 border-red-700 bg-red-100 text-sm font-bold text-red-900 sm:h-10 sm:w-10 sm:text-base";
+	}
+
+	// Double bogey and anything higher both use double-border square styling.
+	return "inline-flex h-8 w-8 items-center justify-center rounded-sm border-2 border-red-700 bg-red-100 text-sm font-bold text-red-900 ring-2 ring-red-700 ring-offset-1 ring-offset-red-100 sm:h-10 sm:w-10 sm:text-base";
+}
+
 export default function RoundDetailPage() {
 	const params = useParams<{ roundId: string }>();
 	const roundId = params.roundId;
@@ -74,6 +123,10 @@ export default function RoundDetailPage() {
 	}, [ loadRound, session?.user ] );
 
 	const enteredHoles = useMemo( () => new Set( round?.holeEntries.map( ( h ) => h.holeSequence ) ?? [] ), [ round ] );
+	const scorecardEntries = useMemo(
+		() => [ ...( round?.holeEntries ?? [] ) ].sort( ( left, right ) => left.holeSequence - right.holeSequence ),
+		[ round?.holeEntries ],
+	);
 	const selectedHoleEntry = useMemo(
 		() => round?.holeEntries.find( ( entry ) => entry.holeSequence === selectedHole ) ?? null,
 		[ round, selectedHole ],
@@ -144,9 +197,24 @@ export default function RoundDetailPage() {
 		return <main className="mx-auto max-w-3xl p-6">Loading...</main>;
 	}
 
+	const roundTitleDate = formatRoundHeaderDate( round.playedOn );
+	const isInProgress = round.status === "IN_PROGRESS";
+	const statusLabel = isInProgress ? "In Progress" : round.status === "COMPLETED" ? "Completed" : round.status;
+	const statusClassName = isInProgress
+		? "bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-300"
+		: "bg-teal-100 text-teal-900 ring-1 ring-inset ring-teal-300";
+
 	return (
 		<main className="mx-auto max-w-3xl space-y-4 p-6">
-			<h1 className="text-2xl font-bold">Round details</h1>
+			<header>
+				<div className="flex flex-wrap items-center gap-2">
+					<h1 className="text-2xl font-bold">{ roundTitleDate }</h1>
+					<span className={ `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${ statusClassName }` }>
+						{ statusLabel }
+					</span>
+				</div>
+				<p className="mt-1 text-sm text-slate-600">{ round.targetHoleCount } holes</p>
+			</header>
 
 			{ round.status === "IN_PROGRESS" ? (
 				<RoundProgress current={ Math.min( selectedHole, round.targetHoleCount ) } total={ round.targetHoleCount } />
@@ -194,7 +262,35 @@ export default function RoundDetailPage() {
 				</section>
 			) : null }
 
-			{ round.status !== "IN_PROGRESS" ? <RoundSummaryCard round={ round } /> : null }
+			{ round.status !== "IN_PROGRESS" ? (
+				<section className="rounded border border-slate-200 bg-white p-4">
+					<h2 className="text-lg font-semibold">Scorecard</h2>
+					<div className="mt-3 overflow-x-auto">
+						<table className={ `w-full border-collapse ${ round.targetHoleCount <= 6 ? "table-fixed" : "min-w-[640px]" }` }>
+							<tbody>
+								<tr>
+									{ scorecardEntries.map( ( entry ) => {
+										const baseHole = ( ( entry.holeSequence - 1 ) % 6 ) + 1;
+										const holeLength = holeLengthByBaseHole[ baseHole ];
+
+										return (
+											<td className="border border-slate-200 px-1 py-1 align-top text-center sm:px-2 sm:py-2" key={ entry.holeSequence }>
+												<p className="text-xs font-semibold text-slate-900 sm:text-sm">{ entry.holeSequence }</p>
+												<p className="mt-0.5 text-[10px] text-slate-600 sm:mt-1 sm:text-xs">{ holeLength } yds</p>
+												<div className="mt-1 sm:mt-2">
+													<span className={ getScoreStyle( entry.strokes ) }>{ entry.strokes }</span>
+												</div>
+											</td>
+										);
+									} ) }
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+			) : null }
+
+			{ round.status !== "IN_PROGRESS" ? <RoundSummaryCard round={ round } hideHeader /> : null }
 			<div className="flex justify-end">
 				<DeleteRoundButton
 					roundId={ round.id }

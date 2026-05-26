@@ -18,7 +18,7 @@ interface RoundBreadcrumbPayload {
 const staticRoundsSegments = new Set( [ "history", "new" ] );
 
 function isRoundIdSegment( segments: string[], index: number ) {
-	return segments[0] === "rounds" && index === 1 && !staticRoundsSegments.has( segments[1] );
+	return segments[ 0 ] === "rounds" && index === 1 && !staticRoundsSegments.has( segments[ 1 ] );
 }
 
 function titleCase( value: string ) {
@@ -75,7 +75,7 @@ function getSegmentLabel( segment: string, allSegments: string[] ) {
 	if ( segment === "stats" ) {
 		return "My Stats";
 	}
-	if ( allSegments[0] === "rounds" && allSegments[1] === segment && !staticRoundsSegments.has( segment ) ) {
+	if ( allSegments[ 0 ] === "rounds" && allSegments[ 1 ] === segment && !staticRoundsSegments.has( segment ) ) {
 		return "Round";
 	}
 	return titleCase( segment );
@@ -86,11 +86,11 @@ export function AppBreadcrumbs() {
 	const segments = useMemo( () => pathname.split( "/" ).filter( Boolean ), [ pathname ] );
 	const [ roundDateLabel, setRoundDateLabel ] = useState<string | null>( null );
 	const roundId = useMemo( () => {
-		if ( segments[0] !== "rounds" || !segments[1] || staticRoundsSegments.has( segments[1] ) ) {
+		if ( segments[ 0 ] !== "rounds" || !segments[ 1 ] || staticRoundsSegments.has( segments[ 1 ] ) ) {
 			return null;
 		}
 
-		return segments[1];
+		return segments[ 1 ];
 	}, [ segments ] );
 
 	useEffect( () => {
@@ -138,7 +138,9 @@ export function AppBreadcrumbs() {
 				{ segments.map( ( segment, index ) => {
 					const href = index === 0 && segment === "rounds"
 						? "/rounds/history"
-						: `/${ segments.slice( 0, index + 1 ).join( "/" ) }`;
+						: index === 1 && segments[ 0 ] === "stats" && segment === "holes"
+							? "/stats#most-frequent-score"
+							: `/${ segments.slice( 0, index + 1 ).join( "/" ) }`;
 					const currentIsRoundIdSegment = isRoundIdSegment( segments, index );
 					const label = currentIsRoundIdSegment && roundDateLabel ? roundDateLabel : getSegmentLabel( segment, segments );
 					const isLast = index === segments.length - 1;
