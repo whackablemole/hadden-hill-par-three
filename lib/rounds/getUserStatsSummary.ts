@@ -7,6 +7,8 @@ interface UserStatsSummary {
 	totalPutts: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
+	totalThreePutts: number;
+	totalFourPlusPutts: number;
 	totalThreePuttPlus: number;
 	totalGir: number;
 	averagePuttsPerHole: number;
@@ -66,6 +68,8 @@ export async function getUserStatsSummary( userId: string ): Promise<UserStatsSu
 
 	const totalOnePutts = holeEntries.filter( ( entry ) => entry.putts === 1 ).length;
 	const totalTwoPutts = holeEntries.filter( ( entry ) => entry.putts === 2 ).length;
+	const totalThreePutts = holeEntries.filter( ( entry ) => entry.putts === 3 ).length;
+	const totalFourPlusPutts = holeEntries.filter( ( entry ) => entry.putts >= 4 ).length;
 	const totalThreePuttPlus = holeEntries.filter( ( entry ) => entry.putts >= 3 ).length;
 	const totalGir = holeEntries.filter( ( entry ) => entry.greenInRegulation ).length;
 
@@ -132,6 +136,8 @@ export async function getUserStatsSummary( userId: string ): Promise<UserStatsSu
 		totalPutts,
 		totalOnePutts,
 		totalTwoPutts,
+		totalThreePutts,
+		totalFourPlusPutts,
 		totalThreePuttPlus,
 		totalGir,
 		averagePuttsPerHole: holesPlayed === 0 ? 0 : totalPutts / holesPlayed,

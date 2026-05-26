@@ -12,6 +12,8 @@ interface OverallStats {
 	totalPutts: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
+	totalThreePutts: number;
+	totalFourPlusPutts: number;
 	totalThreePuttPlus: number;
 	totalGir: number;
 	averagePuttsPerHole: number;
@@ -59,6 +61,8 @@ const normalizeStats = ( data: unknown ): OverallStats | null => {
 		totalPutts: numberOrZero( raw.totalPutts ),
 		totalOnePutts: numberOrZero( raw.totalOnePutts ),
 		totalTwoPutts: numberOrZero( raw.totalTwoPutts ),
+		totalThreePutts: numberOrZero( raw.totalThreePutts ?? raw.totalThreePuttPlus ?? raw.totalThreePuttsOnly ),
+		totalFourPlusPutts: numberOrZero( raw.totalFourPlusPutts ?? raw.totalFourPuttsPlus ),
 		totalThreePuttPlus: numberOrZero( raw.totalThreePuttPlus ?? raw.totalThreePutts ?? raw.totalThreePuttOrMore ),
 		totalGir: numberOrZero( raw.totalGir ?? raw.totalGIR ?? raw.totalGreenInRegulation ),
 		averagePuttsPerHole: numberOrZero( raw.averagePuttsPerHole ),
@@ -181,11 +185,6 @@ export default function StatsPage() {
 		{ label: "Rounds played", value: stats.roundsPlayed },
 		{ label: "Holes played", value: stats.holesPlayed },
 		{ label: "Total strokes", value: stats.totalStrokes },
-		{ label: "Total putts", value: stats.totalPutts },
-		{ label: "Average putts/hole", value: stats.averagePuttsPerHole.toFixed( 2 ) },
-		{ label: "1-putts", value: stats.totalOnePutts, progressPercent: holePercentage( stats.totalOnePutts ) },
-		{ label: "2-putts", value: stats.totalTwoPutts, progressPercent: holePercentage( stats.totalTwoPutts ) },
-		{ label: "3+ putts", value: stats.totalThreePuttPlus, progressPercent: holePercentage( stats.totalThreePuttPlus ) },
 		{ label: "GIR", value: stats.totalGir, progressPercent: holePercentage( stats.totalGir ) },
 	];
 
@@ -195,6 +194,13 @@ export default function StatsPage() {
 		{ label: "Bogeys", value: stats.totalBogeys, progressPercent: holePercentage( stats.totalBogeys ) },
 		{ label: "Double bogeys", value: stats.totalDoubleBogeys, progressPercent: holePercentage( stats.totalDoubleBogeys ) },
 		{ label: "Triple bogeys", value: stats.totalTripleBogeyPlus, progressPercent: holePercentage( stats.totalTripleBogeyPlus ) },
+	];
+
+	const puttBreakdown = [
+		{ label: "One putts", value: stats.totalOnePutts, progressPercent: holePercentage( stats.totalOnePutts ) },
+		{ label: "Two putts", value: stats.totalTwoPutts, progressPercent: holePercentage( stats.totalTwoPutts ) },
+		{ label: "Three putts", value: stats.totalThreePutts, progressPercent: holePercentage( stats.totalThreePutts ) },
+		{ label: "4+ putts", value: stats.totalFourPlusPutts, progressPercent: holePercentage( stats.totalFourPlusPutts ) },
 	];
 
 	return (
@@ -224,6 +230,27 @@ export default function StatsPage() {
 				<h2 className="text-sm font-semibold text-slate-800">Score breakdown</h2>
 				<div className="mt-3 space-y-3">
 					{ scoreBreakdown.map( ( stat ) => (
+						<div className="grid grid-cols-[6.75rem_auto_1fr] items-center gap-4" key={ stat.label }>
+							<p className="text-sm text-slate-700">{ stat.label }</p>
+							<p className="text-sm font-semibold text-slate-900">{ stat.value }</p>
+							<div>
+								<div className="h-2 w-full rounded-full bg-slate-200">
+									<div
+										className="h-2 rounded-full bg-teal-600"
+										style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
+									/>
+								</div>
+								<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
+							</div>
+						</div>
+					) ) }
+				</div>
+			</section>
+
+			<section className="mt-6 rounded border border-slate-200 bg-white p-4">
+				<h2 className="text-sm font-semibold text-slate-800">Putt breakdown</h2>
+				<div className="mt-3 space-y-3">
+					{ puttBreakdown.map( ( stat ) => (
 						<div className="grid grid-cols-[6.75rem_auto_1fr] items-center gap-4" key={ stat.label }>
 							<p className="text-sm text-slate-700">{ stat.label }</p>
 							<p className="text-sm font-semibold text-slate-900">{ stat.value }</p>
