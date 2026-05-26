@@ -36,9 +36,11 @@ export async function GET( request: NextRequest ) {
 			userId: user.id,
 			status: "COMPLETED",
 		},
-		orderBy: {
-			playedOn: "desc",
-		},
+		orderBy: [
+			{ playedOn: "desc" },
+			{ createdAt: "desc" },
+			{ id: "desc" },
+		],
 		select: {
 			id: true,
 			targetHoleCount: true,

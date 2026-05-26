@@ -15,7 +15,11 @@ export async function GET( request: NextRequest ) {
 			userId: user.id,
 			status: status === "IN_PROGRESS" || status === "COMPLETED" ? status : undefined,
 		},
-		orderBy: { playedOn: "desc" },
+		orderBy: [
+			{ playedOn: "desc" },
+			{ createdAt: "desc" },
+			{ id: "desc" },
+		],
 	} );
 
 	return NextResponse.json( { rounds } );
