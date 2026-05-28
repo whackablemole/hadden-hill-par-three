@@ -181,10 +181,10 @@ export function RoundSummaryCard( { round, compact = false, hideHeader = false }
 				<h4 className="text-sm font-semibold text-slate-800">Score breakdown</h4>
 				<div className="mt-3 space-y-3">
 					{ scoreTypeStats.map( ( stat ) => (
-						<div className="grid grid-cols-[6.75rem_auto_1fr] items-center gap-4" key={ stat.label }>
+						<div className="grid grid-cols-[6.75rem_3.5rem_minmax(0,1fr)] items-center gap-4" key={ stat.label }>
 							<p className="text-sm text-slate-700">{ stat.label }</p>
-							<p className="text-sm font-semibold text-slate-900">{ stat.value }</p>
-							<div>
+							<p className="text-right text-sm font-semibold tabular-nums text-slate-900">{ stat.value }</p>
+							<div className="min-w-0">
 								<div className="h-2 w-full rounded-full bg-slate-200">
 									<div
 										className="h-2 rounded-full bg-teal-600"
@@ -202,10 +202,10 @@ export function RoundSummaryCard( { round, compact = false, hideHeader = false }
 					<h4 className="text-sm font-semibold text-slate-800">Putt breakdown</h4>
 					<div className="mt-3 space-y-3">
 						{ puttTypeStats.map( ( stat ) => (
-							<div className="grid grid-cols-[6.75rem_auto_1fr] items-center gap-4" key={ stat.label }>
+							<div className="grid grid-cols-[6.75rem_3.5rem_minmax(0,1fr)] items-center gap-4" key={ stat.label }>
 								<p className="text-sm text-slate-700">{ stat.label }</p>
-								<p className="text-sm font-semibold text-slate-900">{ stat.value }</p>
-								<div>
+								<p className="text-right text-sm font-semibold tabular-nums text-slate-900">{ stat.value }</p>
+								<div className="min-w-0">
 									<div className="h-2 w-full rounded-full bg-slate-200">
 										<div
 											className="h-2 rounded-full bg-teal-600"

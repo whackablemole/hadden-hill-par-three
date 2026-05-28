@@ -4,6 +4,7 @@ interface UserStatsSummary {
 	roundsPlayed: number;
 	holesPlayed: number;
 	totalStrokes: number;
+	bestRoundSixHoles: number | null;
 	totalPutts: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
@@ -50,6 +51,10 @@ export async function getUserStatsSummary( userId: string ): Promise<UserStatsSu
 	const holesPlayed = rounds.reduce( ( sum, r ) => sum + r.targetHoleCount, 0 );
 	const totalStrokes = rounds.reduce( ( sum, r ) => sum + r.totalStrokes, 0 );
 	const totalPutts = rounds.reduce( ( sum, r ) => sum + r.totalPutts, 0 );
+	const sixHoleRounds = rounds.filter( ( round ) => round.targetHoleCount === 6 );
+	const bestRoundSixHoles = sixHoleRounds.length > 0
+		? Math.min( ...sixHoleRounds.map( ( round ) => round.totalStrokes ) )
+		: null;
 
 	const holeEntries = await prisma.holeEntry.findMany( {
 		where: {
@@ -133,6 +138,7 @@ export async function getUserStatsSummary( userId: string ): Promise<UserStatsSu
 		roundsPlayed,
 		holesPlayed,
 		totalStrokes,
+		bestRoundSixHoles,
 		totalPutts,
 		totalOnePutts,
 		totalTwoPutts,

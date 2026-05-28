@@ -9,6 +9,7 @@ interface OverallStats {
 	roundsPlayed: number;
 	holesPlayed: number;
 	totalStrokes: number;
+	bestRoundSixHoles: number | null;
 	totalPutts: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
@@ -47,6 +48,17 @@ const numberOrZero = ( value: unknown ) => {
 	return 0;
 };
 
+const numberOrNull = ( value: unknown ) => {
+	if ( typeof value === "number" && Number.isFinite( value ) ) {
+		return value;
+	}
+	if ( typeof value === "string" ) {
+		const parsed = Number( value );
+		return Number.isFinite( parsed ) ? parsed : null;
+	}
+	return null;
+};
+
 const normalizeStats = ( data: unknown ): OverallStats | null => {
 	if ( !data || typeof data !== "object" ) {
 		return null;
@@ -58,6 +70,7 @@ const normalizeStats = ( data: unknown ): OverallStats | null => {
 		roundsPlayed: numberOrZero( raw.roundsPlayed ),
 		holesPlayed: numberOrZero( raw.holesPlayed ),
 		totalStrokes: numberOrZero( raw.totalStrokes ),
+		bestRoundSixHoles: numberOrNull( raw.bestRoundSixHoles ),
 		totalPutts: numberOrZero( raw.totalPutts ),
 		totalOnePutts: numberOrZero( raw.totalOnePutts ),
 		totalTwoPutts: numberOrZero( raw.totalTwoPutts ),
@@ -181,10 +194,16 @@ export default function StatsPage() {
 		return ( count / stats.holesPlayed ) * 100;
 	};
 
+	const averageRoundSixHoles = stats.holesPlayed <= 0
+		? 0
+		: ( stats.totalStrokes / stats.holesPlayed ) * 6;
+
 	const statCards = [
 		{ label: "Rounds played", value: stats.roundsPlayed },
 		{ label: "Holes played", value: stats.holesPlayed },
-		{ label: "Total strokes", value: stats.totalStrokes },
+		{ label: "Best round (6 holes)", value: stats.bestRoundSixHoles ?? "-" },
+		{ label: "Average round (6 holes)", value: Math.round( averageRoundSixHoles ) },
+		{ label: "Putts per hole", value: stats.averagePuttsPerHole.toFixed( 2 ) },
 		{ label: "GIR", value: stats.totalGir, progressPercent: holePercentage( stats.totalGir ) },
 	];
 
@@ -230,10 +249,10 @@ export default function StatsPage() {
 				<h2 className="text-sm font-semibold text-slate-800">Score breakdown</h2>
 				<div className="mt-3 space-y-3">
 					{ scoreBreakdown.map( ( stat ) => (
-						<div className="grid grid-cols-[6.75rem_auto_1fr] items-center gap-4" key={ stat.label }>
+						<div className="grid grid-cols-[6.75rem_3.5rem_minmax(0,1fr)] items-center gap-4" key={ stat.label }>
 							<p className="text-sm text-slate-700">{ stat.label }</p>
-							<p className="text-sm font-semibold text-slate-900">{ stat.value }</p>
-							<div>
+							<p className="text-right text-sm font-semibold tabular-nums text-slate-900">{ stat.value }</p>
+							<div className="min-w-0">
 								<div className="h-2 w-full rounded-full bg-slate-200">
 									<div
 										className="h-2 rounded-full bg-teal-600"
@@ -251,10 +270,10 @@ export default function StatsPage() {
 				<h2 className="text-sm font-semibold text-slate-800">Putt breakdown</h2>
 				<div className="mt-3 space-y-3">
 					{ puttBreakdown.map( ( stat ) => (
-						<div className="grid grid-cols-[6.75rem_auto_1fr] items-center gap-4" key={ stat.label }>
+						<div className="grid grid-cols-[6.75rem_3.5rem_minmax(0,1fr)] items-center gap-4" key={ stat.label }>
 							<p className="text-sm text-slate-700">{ stat.label }</p>
-							<p className="text-sm font-semibold text-slate-900">{ stat.value }</p>
-							<div>
+							<p className="text-right text-sm font-semibold tabular-nums text-slate-900">{ stat.value }</p>
+							<div className="min-w-0">
 								<div className="h-2 w-full rounded-full bg-slate-200">
 									<div
 										className="h-2 rounded-full bg-teal-600"

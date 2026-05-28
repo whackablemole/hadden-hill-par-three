@@ -6,8 +6,10 @@ import { getAuthenticatedUser } from "@/lib/rounds/ownership";
 type Scope = "lifetime" | "last-round";
 
 interface HomeStats {
+	totalRounds: number;
 	holesPlayed: number;
 	totalStrokes: number;
+	averagePuttsPerHole: number;
 	bestRoundSixHoles: number | null;
 	totalBirdies: number;
 	totalPars: number;
@@ -45,6 +47,7 @@ export async function GET( request: NextRequest ) {
 			id: true,
 			targetHoleCount: true,
 			totalStrokes: true,
+			totalPutts: true,
 			totalBirdies: true,
 			totalPars: true,
 		},
@@ -52,8 +55,10 @@ export async function GET( request: NextRequest ) {
 
 	if ( completedRounds.length === 0 ) {
 		const emptyStats: HomeStats = {
+			totalRounds: 0,
 			holesPlayed: 0,
 			totalStrokes: 0,
+			averagePuttsPerHole: 0,
 			bestRoundSixHoles: null,
 			totalBirdies: 0,
 			totalPars: 0,
@@ -81,6 +86,8 @@ export async function GET( request: NextRequest ) {
 
 	const holesPlayed = roundsForScope.reduce( ( sum, round ) => sum + round.targetHoleCount, 0 );
 	const totalStrokes = roundsForScope.reduce( ( sum, round ) => sum + round.totalStrokes, 0 );
+	const totalPutts = roundsForScope.reduce( ( sum, round ) => sum + round.totalPutts, 0 );
+	const totalRounds = roundsForScope.length;
 	const totalBirdies = roundsForScope.reduce( ( sum, round ) => sum + round.totalBirdies, 0 );
 	const totalPars = roundsForScope.reduce( ( sum, round ) => sum + round.totalPars, 0 );
 	const totalGir = roundsForScope.reduce( ( sum, round ) => sum + ( girCountByRoundId.get( round.id ) ?? 0 ), 0 );
@@ -91,8 +98,10 @@ export async function GET( request: NextRequest ) {
 		: null;
 
 	const stats: HomeStats = {
+		totalRounds,
 		holesPlayed,
 		totalStrokes,
+		averagePuttsPerHole: holesPlayed <= 0 ? 0 : totalPutts / holesPlayed,
 		bestRoundSixHoles,
 		totalBirdies,
 		totalPars,

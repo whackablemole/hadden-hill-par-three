@@ -7,8 +7,10 @@ import { signIn, useSession } from "next-auth/react";
 type StatScope = "lifetime" | "last-round";
 
 interface HomeStats {
+	totalRounds: number;
 	holesPlayed: number;
 	totalStrokes: number;
+	averagePuttsPerHole: number;
 	bestRoundSixHoles: number | null;
 	totalBirdies: number;
 	totalPars: number;
@@ -32,8 +34,10 @@ interface RecentRound {
 }
 
 const EMPTY_STATS: HomeStats = {
+	totalRounds: 0,
 	holesPlayed: 0,
 	totalStrokes: 0,
+	averagePuttsPerHole: 0,
 	bestRoundSixHoles: null,
 	totalBirdies: 0,
 	totalPars: 0,
@@ -95,11 +99,11 @@ export default function HomePage() {
 	}, [ session?.user ] );
 
 	const statCards = [
-		{ label: "Total holes played", value: stats.holesPlayed },
-		{ label: "Total strokes", value: stats.totalStrokes },
+		{ label: "Total rounds", value: stats.totalRounds },
+		{ label: "Total holes", value: stats.holesPlayed },
 		{ label: "Best round (6 holes)", value: stats.bestRoundSixHoles ?? "-" },
-		{ label: "Total birdies", value: stats.totalBirdies },
-		{ label: "Total pars", value: stats.totalPars },
+		{ label: "Average round (6 holes)", value: stats.holesPlayed <= 0 ? "-" : Math.round( ( stats.totalStrokes / stats.holesPlayed ) * 6 ) },
+		{ label: "Average putts", value: stats.averagePuttsPerHole.toFixed( 2 ) },
 		{ label: "GIR", value: formatGir( stats.totalGir, stats.girPercentage ) },
 	];
 
