@@ -50,6 +50,25 @@ function formatGir( totalGir: number, girPercentage: number ) {
 	return `${ totalGir } (${ safePercentage.toFixed( 1 ) }%)`;
 }
 
+function formatParRelative( totalStrokes: number, holesPlayed: number ) {
+	if ( holesPlayed <= 0 ) {
+		return "-";
+	}
+
+	const par = holesPlayed * 3;
+	const difference = totalStrokes - par;
+
+	if ( difference > 0 ) {
+		return `+${ difference }`;
+	}
+
+	if ( difference < 0 ) {
+		return `${ difference }`;
+	}
+
+	return "E";
+}
+
 export default function HomePage() {
 	const { data: session, status } = useSession();
 	const [ scope, setScope ] = useState<StatScope>( "lifetime" );
@@ -98,14 +117,23 @@ export default function HomePage() {
 			.finally( () => setLoadingRecentRounds( false ) );
 	}, [ session?.user ] );
 
-	const statCards = [
-		{ label: "Total rounds", value: stats.totalRounds },
-		{ label: "Total holes", value: stats.holesPlayed },
-		{ label: "Best round (6 holes)", value: stats.bestRoundSixHoles ?? "-" },
-		{ label: "Average round (6 holes)", value: stats.holesPlayed <= 0 ? "-" : Math.round( ( stats.totalStrokes / stats.holesPlayed ) * 6 ) },
-		{ label: "Average putts", value: stats.averagePuttsPerHole.toFixed( 2 ) },
-		{ label: "GIR", value: formatGir( stats.totalGir, stats.girPercentage ) },
-	];
+	const statCards = scope === "last-round"
+		? [
+			{ label: "Total holes", value: stats.holesPlayed },
+			{ label: "Average putts", value: stats.averagePuttsPerHole.toFixed( 2 ) },
+			{ label: "Total birdies", value: stats.totalBirdies },
+			{ label: "Total pars", value: stats.totalPars },
+			{ label: "Par relative", value: formatParRelative( stats.totalStrokes, stats.holesPlayed ) },
+			{ label: "GIR", value: formatGir( stats.totalGir, stats.girPercentage ) },
+		]
+		: [
+			{ label: "Total rounds", value: stats.totalRounds },
+			{ label: "Total holes", value: stats.holesPlayed },
+			{ label: "Best round (6 holes)", value: stats.bestRoundSixHoles ?? "-" },
+			{ label: "Average round (6 holes)", value: stats.holesPlayed <= 0 ? "-" : Math.round( ( stats.totalStrokes / stats.holesPlayed ) * 6 ) },
+			{ label: "Average putts", value: stats.averagePuttsPerHole.toFixed( 2 ) },
+			{ label: "GIR", value: formatGir( stats.totalGir, stats.girPercentage ) },
+		];
 
 	const dateFormatter = new Intl.DateTimeFormat( "en-US", {
 		month: "short",
