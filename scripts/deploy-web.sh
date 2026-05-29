@@ -53,6 +53,7 @@ PM2_APP="${PM2_APP:-6}"
 GIT_BRANCH="${GIT_BRANCH:-main}"
 REMOTE_NODE_BIN="${REMOTE_NODE_BIN:-/home/whackablemole/.nvm/versions/node/v20.20.2/bin/node}"
 STOP_ALL_PM2="${STOP_ALL_PM2:-false}"
+PREFLIGHT_TYPECHECK="${PREFLIGHT_TYPECHECK:-true}"
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-https://golf.whackablemole.com}"
 
 if [[ -z "${SSH_HOST}" || -z "${SSH_USER}" ]]; then
@@ -67,6 +68,7 @@ log_info "Deploy target: ${TARGET}"
 log_info "Remote app dir: ${REMOTE_APP_DIR}"
 log_info "PM2 app: ${PM2_APP}"
 log_info "Branch: ${GIT_BRANCH}"
+log_info "Preflight typecheck: ${PREFLIGHT_TYPECHECK}"
 log_info "Health check URL: ${HEALTHCHECK_URL}"
 
 REMOTE_SCRIPT='set -Eeuo pipefail
@@ -128,14 +130,6 @@ fi
 
 r_info "Node: $(node -v)"
 
-if [[ "${STOP_ALL_PM2}" == "true" ]]; then
-  r_step "Stopping all PM2 processes"
-  pm2 stop all || true
-else
-  r_step "Stopping PM2 app ${PM2_APP}"
-  pm2 stop "${PM2_APP}" || true
-fi
-
 r_step "Pulling latest ${GIT_BRANCH}"
 git fetch origin "${GIT_BRANCH}"
 git checkout "${GIT_BRANCH}"
@@ -144,8 +138,22 @@ git pull --ff-only origin "${GIT_BRANCH}"
 r_step "Installing dependencies"
 npm ci
 
-r_step "Building app"
+if [[ "${PREFLIGHT_TYPECHECK}" == "true" ]]; then
+  r_step "Preflight typecheck (no downtime)"
+  npx tsc --noEmit
+  r_ok "Preflight typecheck passed"
+fi
+
+r_step "Building app (no downtime)"
 npm run build
+
+if [[ "${STOP_ALL_PM2}" == "true" ]]; then
+  r_step "Stopping all PM2 processes"
+  pm2 stop all || true
+else
+  r_step "Stopping PM2 app ${PM2_APP}"
+  pm2 stop "${PM2_APP}" || true
+fi
 
 r_step "Starting PM2 app ${PM2_APP}"
 pm2 start "${PM2_APP}" --update-env "${NODE_INTERPRETER_FLAG[@]}" \
@@ -166,7 +174,7 @@ run_via_ssh() {
   ssh -p "${SSH_PORT}" \
     -o StrictHostKeyChecking="${SSH_STRICT_HOST_KEY_CHECKING:-no}" \
     "${TARGET}" \
-    "REMOTE_APP_DIR=$(printf '%q' "${REMOTE_APP_DIR}") PM2_APP=$(printf '%q' "${PM2_APP}") GIT_BRANCH=$(printf '%q' "${GIT_BRANCH}") REMOTE_NODE_BIN=$(printf '%q' "${REMOTE_NODE_BIN}") STOP_ALL_PM2=$(printf '%q' "${STOP_ALL_PM2}") HEALTHCHECK_URL=$(printf '%q' "${HEALTHCHECK_URL}") bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
+    "REMOTE_APP_DIR=$(printf '%q' "${REMOTE_APP_DIR}") PM2_APP=$(printf '%q' "${PM2_APP}") GIT_BRANCH=$(printf '%q' "${GIT_BRANCH}") REMOTE_NODE_BIN=$(printf '%q' "${REMOTE_NODE_BIN}") STOP_ALL_PM2=$(printf '%q' "${STOP_ALL_PM2}") PREFLIGHT_TYPECHECK=$(printf '%q' "${PREFLIGHT_TYPECHECK}") HEALTHCHECK_URL=$(printf '%q' "${HEALTHCHECK_URL}") bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
 }
 
 run_via_plink() {
@@ -178,7 +186,7 @@ run_via_plink() {
   fi
 
   printf 'y\n' | "${plink_bin}" -ssh -P "${SSH_PORT}" -pw "${SSH_PASSWORD}" "${TARGET}" \
-    "REMOTE_APP_DIR=$(printf '%q' "${REMOTE_APP_DIR}") PM2_APP=$(printf '%q' "${PM2_APP}") GIT_BRANCH=$(printf '%q' "${GIT_BRANCH}") REMOTE_NODE_BIN=$(printf '%q' "${REMOTE_NODE_BIN}") STOP_ALL_PM2=$(printf '%q' "${STOP_ALL_PM2}") HEALTHCHECK_URL=$(printf '%q' "${HEALTHCHECK_URL}") bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
+    "REMOTE_APP_DIR=$(printf '%q' "${REMOTE_APP_DIR}") PM2_APP=$(printf '%q' "${PM2_APP}") GIT_BRANCH=$(printf '%q' "${GIT_BRANCH}") REMOTE_NODE_BIN=$(printf '%q' "${REMOTE_NODE_BIN}") STOP_ALL_PM2=$(printf '%q' "${STOP_ALL_PM2}") PREFLIGHT_TYPECHECK=$(printf '%q' "${PREFLIGHT_TYPECHECK}") HEALTHCHECK_URL=$(printf '%q' "${HEALTHCHECK_URL}") bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
 }
 
 if [[ -n "${SSH_PASSWORD}" ]]; then
