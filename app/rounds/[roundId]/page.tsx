@@ -241,6 +241,7 @@ export default function RoundDetailPage() {
 	const statusClassName = isInProgress
 		? "bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-300"
 		: "bg-teal-100 text-teal-900 ring-1 ring-inset ring-teal-300";
+	const targetHoleCount = round.targetHoleCount;
 	const holeTransitionClassName = holeNavigationDirection === "previous"
 		? "motion-safe:animate-fade-right motion-safe:animate-duration-500 motion-safe:animate-ease-in-out motion-safe:animate-once"
 		: holeNavigationDirection === "next"
@@ -257,12 +258,12 @@ export default function RoundDetailPage() {
 	}
 
 	function goToNextHole() {
-		if ( selectedHole >= round.targetHoleCount ) {
+		if ( selectedHole >= targetHoleCount ) {
 			return;
 		}
 
 		setHoleNavigationDirection( "next" );
-		setSelectedHole( ( value ) => Math.min( round.targetHoleCount, value + 1 ) );
+		setSelectedHole( ( value ) => Math.min( targetHoleCount, value + 1 ) );
 	}
 
 	return (
