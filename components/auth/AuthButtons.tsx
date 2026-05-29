@@ -2,6 +2,7 @@
 
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -34,7 +35,12 @@ export function AuthButtons() {
 	}
 
 	if ( status === "loading" ) {
-		return <span className="text-sm text-slate-600">Checking session...</span>;
+		return (
+			<div className="flex items-center gap-2">
+				<Skeleton className="h-8 w-8 rounded-full" />
+				<Skeleton className="h-4 w-24" />
+			</div>
+		);
 	}
 
 	if ( !session?.user ) {

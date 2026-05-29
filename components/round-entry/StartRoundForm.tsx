@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function StartRoundForm() {
 	const router = useRouter();
@@ -42,7 +43,19 @@ export function StartRoundForm() {
 	}
 
 	if ( status === "loading" ) {
-		return <p className="text-sm text-slate-600">Checking session...</p>;
+		return (
+			<div className="space-y-4">
+				<div>
+					<Skeleton className="mb-2 h-4 w-24" />
+					<Skeleton className="h-10 w-full rounded" />
+				</div>
+				<div>
+					<Skeleton className="mb-2 h-4 w-28" />
+					<Skeleton className="h-10 w-full rounded" />
+				</div>
+				<Skeleton className="h-10 w-32 rounded" />
+			</div>
+		);
 	}
 
 	if ( !session?.user ) {

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Providers from "@/app/providers";
 import { AuthButtons } from "@/components/auth/AuthButtons";
 import { AppBreadcrumbs } from "@/components/navigation/AppBreadcrumbs";
+import { InProgressPageTransition } from "@/components/navigation/InProgressPageTransition";
 import { MobileFooterNav } from "@/components/navigation/MobileFooterNav";
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export default function RootLayout( {
 					<div className="mx-auto max-w-5xl px-4 pt-3">
 						<AppBreadcrumbs />
 					</div>
-					{ children }
+					<InProgressPageTransition>{ children }</InProgressPageTransition>
 					<MobileFooterNav />
 				</Providers>
 			</body>

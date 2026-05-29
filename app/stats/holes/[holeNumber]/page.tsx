@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface HoleStats {
 	hole: number;
@@ -66,6 +67,38 @@ const normalizeHoleStats = ( data: unknown, fallbackHole: number ): HoleStats | 
 	};
 };
 
+function HoleStatsSkeleton() {
+	return (
+		<main className="mx-auto max-w-3xl space-y-4 p-6" aria-hidden="true">
+			<header className="flex items-center justify-between gap-3">
+				<div>
+					<Skeleton className="h-8 w-40" />
+					<Skeleton className="mt-2 h-4 w-20" />
+				</div>
+				<Skeleton className="h-9 w-32" />
+			</header>
+
+			<article className="rounded border border-slate-200 bg-white p-4">
+				<Skeleton className="h-4 w-28" />
+				<div className="mt-3 space-y-3">
+					{ Array.from( { length: 5 }, ( _, index ) => (
+						<Skeleton className="h-7 w-full" key={ index } />
+					) ) }
+				</div>
+			</article>
+
+			<article className="rounded border border-slate-200 bg-white p-4">
+				<Skeleton className="h-4 w-24" />
+				<div className="mt-3 space-y-3">
+					{ Array.from( { length: 4 }, ( _, index ) => (
+						<Skeleton className="h-7 w-full" key={ index } />
+					) ) }
+				</div>
+			</article>
+		</main>
+	);
+}
+
 export default function HoleStatsPage() {
 	const params = useParams<{ holeNumber: string }>();
 	const hole = Number.parseInt( params.holeNumber, 10 );
@@ -94,7 +127,7 @@ export default function HoleStatsPage() {
 	);
 
 	if ( status === "loading" ) {
-		return <main className="mx-auto max-w-3xl p-6">Checking session...</main>;
+		return <HoleStatsSkeleton />;
 	}
 
 	if ( !session?.user ) {
@@ -115,7 +148,7 @@ export default function HoleStatsPage() {
 	}
 
 	if ( !stats ) {
-		return <main className="mx-auto max-w-3xl p-6">Loading hole stats...</main>;
+		return <HoleStatsSkeleton />;
 	}
 
 	const scoreBreakdown = [

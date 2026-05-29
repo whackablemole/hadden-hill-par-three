@@ -1,3 +1,5 @@
+import { AnimatedProgressBar } from "@/components/ui/AnimatedProgressBar";
+
 interface RoundSummaryCardProps {
 	round: {
 		id: string;
@@ -165,12 +167,7 @@ export function RoundSummaryCard( { round, compact = false, hideHeader = false }
 						<p className="mt-1 text-2xl font-semibold text-slate-900">{ stat.value }</p>
 						{ typeof stat.progressPercent === "number" ? (
 							<div className="mt-3">
-								<div className="h-2 w-full rounded-full bg-slate-200">
-									<div
-										className="h-2 rounded-full bg-teal-600"
-										style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
-									/>
-								</div>
+								<AnimatedProgressBar percentage={ stat.progressPercent } />
 								<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
 							</div>
 						) : null }
@@ -185,12 +182,7 @@ export function RoundSummaryCard( { round, compact = false, hideHeader = false }
 							<p className="text-sm text-slate-700">{ stat.label }</p>
 							<p className="text-right text-sm font-semibold tabular-nums text-slate-900">{ stat.value }</p>
 							<div className="min-w-0">
-								<div className="h-2 w-full rounded-full bg-slate-200">
-									<div
-										className="h-2 rounded-full bg-teal-600"
-										style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
-									/>
-								</div>
+								<AnimatedProgressBar percentage={ stat.progressPercent } />
 								<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
 							</div>
 						</div>
@@ -206,12 +198,7 @@ export function RoundSummaryCard( { round, compact = false, hideHeader = false }
 								<p className="text-sm text-slate-700">{ stat.label }</p>
 								<p className="text-right text-sm font-semibold tabular-nums text-slate-900">{ stat.value }</p>
 								<div className="min-w-0">
-									<div className="h-2 w-full rounded-full bg-slate-200">
-										<div
-											className="h-2 rounded-full bg-teal-600"
-											style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
-										/>
-									</div>
+									<AnimatedProgressBar percentage={ stat.progressPercent } />
 									<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
 								</div>
 							</div>

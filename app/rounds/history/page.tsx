@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { RoundSummaryCard } from "@/components/stats/RoundSummaryCard";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface RoundSummary {
 	id: string;
@@ -18,6 +19,23 @@ interface RoundSummary {
 	totalBogeys: number;
 	totalDoubleBogeys: number;
 	totalTripleBogeyPlus: number;
+}
+
+function RoundHistorySkeleton() {
+	return (
+		<main className="mx-auto max-w-4xl space-y-4 p-6" aria-hidden="true">
+			<Skeleton className="h-8 w-44" />
+			<div className="space-y-3">
+				{ Array.from( { length: 3 }, ( _, index ) => (
+					<article className="rounded border border-slate-200 bg-white p-4" key={ index }>
+						<Skeleton className="h-4 w-32" />
+						<Skeleton className="mt-2 h-4 w-24" />
+						<Skeleton className="mt-3 h-8 w-20" />
+					</article>
+				) ) }
+			</div>
+		</main>
+	);
 }
 
 export default function RoundHistoryPage() {
@@ -42,7 +60,7 @@ export default function RoundHistoryPage() {
 	}, [ session?.user ] );
 
 	if ( status === "loading" ) {
-		return <main className="mx-auto max-w-4xl p-6">Checking session...</main>;
+		return <RoundHistorySkeleton />;
 	}
 
 	if ( !session?.user ) {

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { classifyScore } from "@/lib/scoring/calculateRoundStats";
+import { AnimatedProgressBar } from "@/components/ui/AnimatedProgressBar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface OverallStats {
 	roundsPlayed: number;
@@ -136,6 +138,30 @@ function getScoreStyle( strokes: number ) {
 	return "inline-flex h-8 w-8 items-center justify-center rounded-sm border-2 border-red-700 bg-red-100 text-sm font-bold text-red-900 ring-2 ring-red-700 ring-offset-1 ring-offset-red-100 sm:h-10 sm:w-10 sm:text-base";
 }
 
+function StatsPageSkeleton() {
+	return (
+		<main className="mx-auto max-w-3xl p-6" aria-hidden="true">
+			<Skeleton className="h-8 w-32" />
+			<div className="mt-4 grid grid-cols-2 gap-3">
+				{ Array.from( { length: 6 }, ( _, index ) => (
+					<article className="rounded border border-slate-200 bg-white p-4" key={ index }>
+						<Skeleton className="h-4 w-20" />
+						<Skeleton className="mt-2 h-7 w-14" />
+					</article>
+				) ) }
+			</div>
+			<div className="mt-6 rounded border border-slate-200 bg-white p-4">
+				<Skeleton className="h-4 w-28" />
+				<div className="mt-3 space-y-3">
+					{ Array.from( { length: 5 }, ( _, index ) => (
+						<Skeleton className="h-7 w-full" key={ index } />
+					) ) }
+				</div>
+			</div>
+		</main>
+	);
+}
+
 export default function StatsPage() {
 	const { data: session, status } = useSession();
 	const [ stats, setStats ] = useState<OverallStats | null>( null );
@@ -163,7 +189,7 @@ export default function StatsPage() {
 	}, [ stats ] );
 
 	if ( status === "loading" ) {
-		return <main className="mx-auto max-w-3xl p-6">Checking session...</main>;
+		return <StatsPageSkeleton />;
 	}
 
 	if ( !session?.user ) {
@@ -184,7 +210,7 @@ export default function StatsPage() {
 	}
 
 	if ( !stats ) {
-		return <main className="mx-auto max-w-3xl p-6">Loading stats...</main>;
+		return <StatsPageSkeleton />;
 	}
 
 	const holePercentage = ( count: number ) => {
@@ -232,12 +258,7 @@ export default function StatsPage() {
 						<p className="mt-1 text-2xl font-semibold text-slate-900">{ stat.value }</p>
 						{ typeof stat.progressPercent === "number" ? (
 							<div className="mt-3">
-								<div className="h-2 w-full rounded-full bg-slate-200">
-									<div
-										className="h-2 rounded-full bg-teal-600"
-										style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
-									/>
-								</div>
+								<AnimatedProgressBar percentage={ stat.progressPercent } />
 								<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
 							</div>
 						) : null }
@@ -253,12 +274,7 @@ export default function StatsPage() {
 							<p className="text-sm text-slate-700">{ stat.label }</p>
 							<p className="text-right text-sm font-semibold tabular-nums text-slate-900">{ stat.value }</p>
 							<div className="min-w-0">
-								<div className="h-2 w-full rounded-full bg-slate-200">
-									<div
-										className="h-2 rounded-full bg-teal-600"
-										style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
-									/>
-								</div>
+								<AnimatedProgressBar percentage={ stat.progressPercent } />
 								<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
 							</div>
 						</div>
@@ -274,12 +290,7 @@ export default function StatsPage() {
 							<p className="text-sm text-slate-700">{ stat.label }</p>
 							<p className="text-right text-sm font-semibold tabular-nums text-slate-900">{ stat.value }</p>
 							<div className="min-w-0">
-								<div className="h-2 w-full rounded-full bg-slate-200">
-									<div
-										className="h-2 rounded-full bg-teal-600"
-										style={ { width: `${ Math.max( 0, Math.min( stat.progressPercent, 100 ) ) }%` } }
-									/>
-								</div>
+								<AnimatedProgressBar percentage={ stat.progressPercent } />
 								<p className="mt-1 text-xs text-slate-600">{ stat.progressPercent.toFixed( 1 ) }%</p>
 							</div>
 						</div>

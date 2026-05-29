@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type StatScope = "lifetime" | "last-round";
 
@@ -169,7 +170,12 @@ export default function HomePage() {
 					</div>
 				</div>
 
-				{ status === "loading" ? <p className="mt-4 text-sm text-slate-600">Checking session...</p> : null }
+				{ status === "loading" ? (
+					<div className="mt-4 space-y-2">
+						<Skeleton className="h-4 w-36" />
+						<Skeleton className="h-3 w-52" />
+					</div>
+				) : null }
 				{ status !== "loading" && !session?.user ? (
 					<div className="mt-4">
 						<p className="text-sm text-slate-600">Sign in to view your stats dashboard.</p>
@@ -185,15 +191,25 @@ export default function HomePage() {
 
 				{ session?.user ? (
 					<>
-						{ loadingStats ? <p className="mt-4 text-sm text-slate-600">Loading stats...</p> : null }
-						<div className="mt-4 grid grid-cols-2 gap-3">
-							{ statCards.map( ( card ) => (
-								<article className="rounded border border-slate-200 p-3" key={ card.label }>
-									<p className="text-xs text-slate-600">{ card.label }</p>
-									<p className="mt-1 text-xl font-semibold text-slate-900">{ card.value }</p>
-								</article>
-							) ) }
-						</div>
+						{ loadingStats ? (
+							<div className="mt-4 grid grid-cols-2 gap-3">
+								{ Array.from( { length: 6 }, ( _, index ) => (
+									<article className="rounded border border-slate-200 p-3" key={ index }>
+										<Skeleton className="h-3 w-20" />
+										<Skeleton className="mt-2 h-6 w-14" />
+									</article>
+								) ) }
+							</div>
+						) : (
+							<div className="mt-4 grid grid-cols-2 gap-3">
+								{ statCards.map( ( card ) => (
+									<article className="rounded border border-slate-200 p-3" key={ card.label }>
+										<p className="text-xs text-slate-600">{ card.label }</p>
+										<p className="mt-1 text-xl font-semibold text-slate-900">{ card.value }</p>
+									</article>
+								) ) }
+							</div>
+						) }
 
 						<div className="mt-6 border-t border-slate-200 pt-4">
 							<div className="flex items-center justify-between gap-3">
@@ -203,7 +219,16 @@ export default function HomePage() {
 								</Link>
 							</div>
 
-							{ loadingRecentRounds ? <p className="mt-3 text-sm text-slate-600">Loading recent rounds...</p> : null }
+							{ loadingRecentRounds ? (
+								<ul className="mt-3 space-y-2" aria-hidden="true">
+									{ Array.from( { length: 3 }, ( _, index ) => (
+										<li className="rounded border border-slate-200 px-3 py-2" key={ index }>
+											<Skeleton className="h-4 w-36" />
+											<Skeleton className="mt-2 h-3 w-28" />
+										</li>
+									) ) }
+								</ul>
+							) : null }
 							{ !loadingRecentRounds && recentRounds.length === 0 ? <p className="mt-3 text-sm text-slate-600">No rounds yet.</p> : null }
 
 							{ !loadingRecentRounds && recentRounds.length > 0 ? (

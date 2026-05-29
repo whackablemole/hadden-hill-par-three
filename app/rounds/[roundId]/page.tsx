@@ -8,6 +8,7 @@ import { HoleEntryForm, HoleEntryPayload } from "@/components/round-entry/HoleEn
 import { RoundProgress } from "@/components/round-entry/RoundProgress";
 import { DeleteRoundButton } from "@/components/stats/DeleteRoundButton";
 import { RoundSummaryCard } from "@/components/stats/RoundSummaryCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { saveHoleEntry } from "@/lib/rounds/saveHoleEntry";
 import { classifyScore } from "@/lib/scoring/calculateRoundStats";
 
@@ -33,6 +34,8 @@ interface RoundData {
 		greenInRegulation: boolean;
 	}>;
 }
+
+type HoleNavigationDirection = "next" | "previous" | null;
 
 const holeLengthByBaseHole: Record<number, number> = {
 	1: 150,
@@ -91,6 +94,40 @@ function getScoreStyle( strokes: number ) {
 	return "inline-flex h-8 w-8 items-center justify-center rounded-sm border-2 border-red-700 bg-red-100 text-sm font-bold text-red-900 ring-2 ring-red-700 ring-offset-1 ring-offset-red-100 sm:h-10 sm:w-10 sm:text-base";
 }
 
+function RoundDetailSkeleton() {
+	return (
+		<main className="mx-auto max-w-3xl space-y-4 p-6" aria-hidden="true">
+			<header>
+				<div className="flex flex-wrap items-center gap-2">
+					<Skeleton className="h-8 w-56" />
+					<Skeleton className="h-6 w-24 rounded-full" />
+				</div>
+				<Skeleton className="mt-2 h-4 w-20" />
+			</header>
+
+			<div className="rounded border border-slate-200 bg-white p-3">
+				<Skeleton className="h-4 w-44" />
+				<Skeleton className="mt-2 h-2 w-full" />
+			</div>
+
+			<section className="space-y-3">
+				<div className="rounded border border-slate-200 bg-white p-3">
+					<div className="flex items-center justify-between">
+						<Skeleton className="h-10 w-10" />
+						<div className="text-center">
+							<Skeleton className="h-5 w-20" />
+							<Skeleton className="mt-2 h-4 w-16" />
+						</div>
+						<Skeleton className="h-10 w-10" />
+					</div>
+				</div>
+				<Skeleton className="h-72 w-full rounded" />
+				<Skeleton className="h-10 w-full rounded" />
+			</section>
+		</main>
+	);
+}
+
 export default function RoundDetailPage() {
 	const params = useParams<{ roundId: string }>();
 	const roundId = params.roundId;
@@ -98,6 +135,7 @@ export default function RoundDetailPage() {
 	const [ round, setRound ] = useState<RoundData | null>( null );
 	const [ error, setError ] = useState<string | null>( null );
 	const [ selectedHole, setSelectedHole ] = useState( 1 );
+	const [ holeNavigationDirection, setHoleNavigationDirection ] = useState<HoleNavigationDirection>( null );
 	const router = useRouter();
 
 	const loadRound = useCallback( async () => {
@@ -155,7 +193,7 @@ export default function RoundDetailPage() {
 	}, [ selectedHoleEntry ] );
 
 	if ( status === "loading" ) {
-		return <main className="mx-auto max-w-3xl p-6">Checking session...</main>;
+		return <RoundDetailSkeleton />;
 	}
 
 	if ( !session?.user ) {
@@ -194,7 +232,7 @@ export default function RoundDetailPage() {
 	}
 
 	if ( !round ) {
-		return <main className="mx-auto max-w-3xl p-6">Loading...</main>;
+		return <RoundDetailSkeleton />;
 	}
 
 	const roundTitleDate = formatRoundHeaderDate( round.playedOn );
@@ -203,6 +241,29 @@ export default function RoundDetailPage() {
 	const statusClassName = isInProgress
 		? "bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-300"
 		: "bg-teal-100 text-teal-900 ring-1 ring-inset ring-teal-300";
+	const holeTransitionClassName = holeNavigationDirection === "previous"
+		? "motion-safe:animate-fade-right motion-safe:animate-duration-500 motion-safe:animate-ease-in-out motion-safe:animate-once"
+		: holeNavigationDirection === "next"
+			? "motion-safe:animate-fade-left motion-safe:animate-duration-500 motion-safe:animate-ease-in-out motion-safe:animate-once"
+			: "";
+
+	function goToPreviousHole() {
+		if ( selectedHole <= 1 ) {
+			return;
+		}
+
+		setHoleNavigationDirection( "previous" );
+		setSelectedHole( ( value ) => Math.max( 1, value - 1 ) );
+	}
+
+	function goToNextHole() {
+		if ( selectedHole >= round.targetHoleCount ) {
+			return;
+		}
+
+		setHoleNavigationDirection( "next" );
+		setSelectedHole( ( value ) => Math.min( round.targetHoleCount, value + 1 ) );
+	}
 
 	return (
 		<main className="mx-auto max-w-3xl space-y-4 p-6">
@@ -222,39 +283,41 @@ export default function RoundDetailPage() {
 
 			{ round.status === "IN_PROGRESS" ? (
 				<section className="space-y-3">
-					<div className="rounded border border-slate-200 bg-white p-3">
-						<div className="flex items-center justify-between">
-							<button
-								className="rounded border border-teal-600 p-2 text-lg text-teal-700 hover:bg-teal-50 disabled:opacity-40"
-								type="button"
-								onClick={ () => setSelectedHole( ( value ) => Math.max( 1, value - 1 ) ) }
-								disabled={ selectedHole <= 1 }
-								aria-label="Previous hole"
-							>
-								<ChevronLeftIcon className="h-6 w-6" />
-							</button>
-							<div className="text-center">
-								<p className="text-base font-semibold">Hole { selectedHole }</p>
-								<p className="text-sm text-slate-600">{ selectedHoleLength } yards</p>
-								{ enteredHoles.has( selectedHole ) ? (
-									<p className="text-xs text-teal-700">Saved</p>
-								) : (
-									<p className="text-xs text-slate-500">Not saved</p>
-								) }
+					<div key={ selectedHole } className={ `space-y-3 ${ holeTransitionClassName }` }>
+						<div className="rounded border border-slate-200 bg-white p-3">
+							<div className="flex items-center justify-between">
+								<button
+									className="rounded border border-teal-600 p-2 text-lg text-teal-700 hover:bg-teal-50 disabled:opacity-40"
+									type="button"
+									onClick={ goToPreviousHole }
+									disabled={ selectedHole <= 1 }
+									aria-label="Previous hole"
+								>
+									<ChevronLeftIcon className="h-6 w-6" />
+								</button>
+								<div className="text-center">
+									<p className="text-base font-semibold">Hole { selectedHole }</p>
+									<p className="text-sm text-slate-600">{ selectedHoleLength } yards</p>
+									{ enteredHoles.has( selectedHole ) ? (
+										<p className="text-xs text-teal-700">Saved</p>
+									) : (
+										<p className="text-xs text-slate-500">Not saved</p>
+									) }
+								</div>
+								<button
+									className="rounded border border-teal-600 p-2 text-lg text-teal-700 hover:bg-teal-50 disabled:opacity-40"
+									type="button"
+									onClick={ goToNextHole }
+									disabled={ selectedHole >= round.targetHoleCount }
+									aria-label="Next hole"
+								>
+									<ChevronRightIcon className="h-6 w-6" />
+								</button>
 							</div>
-							<button
-								className="rounded border border-teal-600 p-2 text-lg text-teal-700 hover:bg-teal-50 disabled:opacity-40"
-								type="button"
-								onClick={ () => setSelectedHole( ( value ) => Math.min( round.targetHoleCount, value + 1 ) ) }
-								disabled={ selectedHole >= round.targetHoleCount }
-								aria-label="Next hole"
-							>
-								<ChevronRightIcon className="h-6 w-6" />
-							</button>
 						</div>
-					</div>
 
-					<HoleEntryForm initialPayload={ initialHolePayload } onSave={ onSave } />
+						<HoleEntryForm initialPayload={ initialHolePayload } onSave={ onSave } />
+					</div>
 
 					<button className="w-full rounded bg-emerald-700 px-4 py-2 text-white hover:bg-emerald-800" onClick={ onComplete } type="button">
 						Complete round
