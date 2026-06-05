@@ -50,3 +50,9 @@ npm run lint
 npm run test
 npm run test:e2e
 ```
+
+## Friend Codes Feature Notes
+
+- Friend codes are provisioned server-side for authenticated users on first access.
+- To validate social sharing locally, sign in with two different Google accounts.
+- Friend-facing views expose name, stats, and rounds only; email is intentionally excluded.

@@ -1,0 +1,280 @@
+openapi: 3.0.3
+info:
+  title: Hadden Hill Friend Sharing API
+  version: 1.0.0
+  description: User-scoped friend code and friend-sharing contract.
+servers:
+  - url: /api
+security:
+  - sessionAuth: []
+paths:
+  /friends/code:
+    get:
+      summary: Get the authenticated user's friend code
+      operationId: getOwnFriendCode
+      responses:
+        '200':
+          description: Friend code retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendCodeResponse'
+        '401':
+          description: Authentication required
+  /friends:
+    get:
+      summary: List authenticated user's friends
+      operationId: listFriends
+      responses:
+        '200':
+          description: Friend list retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [friends]
+                properties:
+                  friends:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendSummary'
+        '401':
+          description: Authentication required
+    post:
+      summary: Add a friend using friend code
+      operationId: addFriendByCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddFriendRequest'
+      responses:
+        '201':
+          description: Friendship created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendSummary'
+        '400':
+          description: Invalid friend code or self-add attempt
+        '401':
+          description: Authentication required
+        '409':
+          description: Friendship already exists
+  /friends/{friendUserId}/profile:
+    get:
+      summary: Get friend profile visible to authenticated user
+      operationId: getFriendProfile
+      parameters:
+        - $ref: '#/components/parameters/FriendUserId'
+      responses:
+        '200':
+          description: Friend profile visible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendProfile'
+        '401':
+          description: Authentication required
+        '403':
+          description: Not friends with target user
+        '404':
+          description: Friend user not found
+  /friends/{friendUserId}/stats/overall:
+    get:
+      summary: Get overall statistics for a friend user
+      operationId: getFriendOverallStats
+      parameters:
+        - $ref: '#/components/parameters/FriendUserId'
+      responses:
+        '200':
+          description: Friend overall stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatsSummary'
+        '401':
+          description: Authentication required
+        '403':
+          description: Not friends with target user
+        '404':
+          description: Friend user not found
+  /friends/{friendUserId}/rounds/history:
+    get:
+      summary: List previous rounds for a friend user
+      operationId: listFriendRoundHistory
+      parameters:
+        - $ref: '#/components/parameters/FriendUserId'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [IN_PROGRESS, COMPLETED]
+      responses:
+        '200':
+          description: Friend rounds retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [rounds]
+                properties:
+                  rounds:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoundSummary'
+        '401':
+          description: Authentication required
+        '403':
+          description: Not friends with target user
+        '404':
+          description: Friend user not found
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: authjs.session-token
+  parameters:
+    FriendUserId:
+      name: friendUserId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    AddFriendRequest:
+      type: object
+      required: [friendCode]
+      properties:
+        friendCode:
+          type: string
+          minLength: 6
+          maxLength: 32
+    FriendCodeResponse:
+      type: object
+      required: [friendCode]
+      properties:
+        friendCode:
+          type: string
+    FriendSummary:
+      type: object
+      description: Friend list item visible to connected users. Email is intentionally excluded.
+      additionalProperties: false
+      required: [friendUserId, displayName, connectedAt]
+      properties:
+        friendUserId:
+          type: string
+        displayName:
+          type: string
+        connectedAt:
+          type: string
+          format: date-time
+    FriendProfile:
+      type: object
+      description: Friend profile identity payload. Email is intentionally excluded.
+      additionalProperties: false
+      required: [friendUserId, displayName]
+      properties:
+        friendUserId:
+          type: string
+        displayName:
+          type: string
+    RoundSummary:
+      type: object
+      description: Friend-visible round summary payload with scoring metrics only.
+      additionalProperties: false
+      required:
+        - id
+        - playedOn
+        - targetHoleCount
+        - status
+        - totalStrokes
+        - totalPutts
+        - averagePuttsPerHole
+        - totalBirdies
+        - totalPars
+        - totalBogeys
+        - totalDoubleBogeys
+        - totalTripleBogeyPlus
+      properties:
+        id:
+          type: string
+        playedOn:
+          type: string
+          format: date
+        targetHoleCount:
+          type: integer
+          enum: [6, 12, 18]
+        status:
+          type: string
+          enum: [IN_PROGRESS, COMPLETED]
+        totalStrokes:
+          type: integer
+          minimum: 0
+        totalPutts:
+          type: integer
+          minimum: 0
+        averagePuttsPerHole:
+          type: number
+        totalBirdies:
+          type: integer
+          minimum: 0
+        totalPars:
+          type: integer
+          minimum: 0
+        totalBogeys:
+          type: integer
+          minimum: 0
+        totalDoubleBogeys:
+          type: integer
+          minimum: 0
+        totalTripleBogeyPlus:
+          type: integer
+          minimum: 0
+    UserStatsSummary:
+      type: object
+      description: Friend-visible overall stats payload. No personal contact fields are included.
+      additionalProperties: false
+      required:
+        - roundsPlayed
+        - holesPlayed
+        - totalStrokes
+        - totalPutts
+        - averagePuttsPerHole
+        - totalBirdies
+        - totalPars
+        - totalBogeys
+        - totalDoubleBogeys
+        - totalTripleBogeyPlus
+      properties:
+        roundsPlayed:
+          type: integer
+          minimum: 0
+        holesPlayed:
+          type: integer
+          minimum: 0
+        totalStrokes:
+          type: integer
+          minimum: 0
+        totalPutts:
+          type: integer
+          minimum: 0
+        averagePuttsPerHole:
+          type: number
+        totalBirdies:
+          type: integer
+          minimum: 0
+        totalPars:
+          type: integer
+          minimum: 0
+        totalBogeys:
+          type: integer
+          minimum: 0
+        totalDoubleBogeys:
+          type: integer
+          minimum: 0
+        totalTripleBogeyPlus:
+          type: integer
+          minimum: 0

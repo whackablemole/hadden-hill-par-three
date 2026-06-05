@@ -75,6 +75,12 @@ function getSegmentLabel( segment: string, allSegments: string[] ) {
 	if ( segment === "stats" ) {
 		return "My Stats";
 	}
+	if ( segment === "friends" ) {
+		return "Friends";
+	}
+	if ( allSegments[ 0 ] === "friends" && allSegments[ 1 ] === segment ) {
+		return "Friend";
+	}
 	if ( allSegments[ 0 ] === "rounds" && allSegments[ 1 ] === segment && !staticRoundsSegments.has( segment ) ) {
 		return "Round";
 	}
