@@ -33,6 +33,9 @@ export default function RootLayout( {
 									<Link className="rounded px-2 py-1 hover:bg-slate-100 hover:text-teal-700" href="/rounds/new">
 										Start Round
 									</Link>
+									<Link className="rounded px-2 py-1 hover:bg-slate-100 hover:text-teal-700" href="/friends">
+										Friends
+									</Link>
 									<Link className="rounded px-2 py-1 hover:bg-slate-100 hover:text-teal-700" href="/rounds/history">
 										History
 									</Link>

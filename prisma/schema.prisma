@@ -13,13 +13,29 @@ enum RoundStatus {
 }
 
 model User {
-    id        String   @id @default(cuid())
-    email     String   @unique
-    name      String?
-    imageUrl  String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    rounds    Round[]
+    id                String       @id @default(cuid())
+    email             String       @unique
+    name              String?
+    imageUrl          String?
+    friendCode        String?      @unique
+    createdAt         DateTime     @default(now())
+    updatedAt         DateTime     @updatedAt
+    rounds            Round[]
+    friendshipsAsLow  Friendship[] @relation("FriendshipLowUser")
+    friendshipsAsHigh Friendship[] @relation("FriendshipHighUser")
+}
+
+model Friendship {
+    id         String   @id @default(cuid())
+    userLowId  String
+    userHighId String
+    createdAt  DateTime @default(now())
+    userLow    User     @relation("FriendshipLowUser", fields: [userLowId], references: [id], onDelete: Cascade)
+    userHigh   User     @relation("FriendshipHighUser", fields: [userHighId], references: [id], onDelete: Cascade)
+
+    @@unique([userLowId, userHighId])
+    @@index([userLowId])
+    @@index([userHighId])
 }
 
 model CourseHoleDefinition {
