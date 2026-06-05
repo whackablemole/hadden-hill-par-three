@@ -55,6 +55,7 @@ REMOTE_NODE_BIN="${REMOTE_NODE_BIN:-/home/whackablemole/.nvm/versions/node/v20.2
 STOP_ALL_PM2="${STOP_ALL_PM2:-false}"
 PREFLIGHT_TYPECHECK="${PREFLIGHT_TYPECHECK:-true}"
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-https://golf.whackablemole.com}"
+RUN_PRISMA_MIGRATIONS="${RUN_PRISMA_MIGRATIONS:-true}"
 
 if [[ -z "${SSH_HOST}" || -z "${SSH_USER}" ]]; then
   log_error "SSH_HOST and SSH_USER must be set."
@@ -70,6 +71,7 @@ log_info "PM2 app: ${PM2_APP}"
 log_info "Branch: ${GIT_BRANCH}"
 log_info "Preflight typecheck: ${PREFLIGHT_TYPECHECK}"
 log_info "Health check URL: ${HEALTHCHECK_URL}"
+log_info "Run Prisma migrations: ${RUN_PRISMA_MIGRATIONS}"
 
 REMOTE_SCRIPT='set -Eeuo pipefail
 
@@ -147,6 +149,14 @@ fi
 r_step "Building app (no downtime)"
 npm run build
 
+if [[ "${RUN_PRISMA_MIGRATIONS}" == "true" ]]; then
+  r_step "Applying Prisma migrations (if any)"
+  npx prisma migrate deploy
+  r_ok "Prisma migration step completed"
+else
+  r_info "Skipping Prisma migrations (RUN_PRISMA_MIGRATIONS=${RUN_PRISMA_MIGRATIONS})"
+fi
+
 if [[ "${STOP_ALL_PM2}" == "true" ]]; then
   r_step "Stopping all PM2 processes"
   pm2 stop all || true
@@ -174,7 +184,7 @@ run_via_ssh() {
   ssh -p "${SSH_PORT}" \
     -o StrictHostKeyChecking="${SSH_STRICT_HOST_KEY_CHECKING:-no}" \
     "${TARGET}" \
-    "REMOTE_APP_DIR=$(printf '%q' "${REMOTE_APP_DIR}") PM2_APP=$(printf '%q' "${PM2_APP}") GIT_BRANCH=$(printf '%q' "${GIT_BRANCH}") REMOTE_NODE_BIN=$(printf '%q' "${REMOTE_NODE_BIN}") STOP_ALL_PM2=$(printf '%q' "${STOP_ALL_PM2}") PREFLIGHT_TYPECHECK=$(printf '%q' "${PREFLIGHT_TYPECHECK}") HEALTHCHECK_URL=$(printf '%q' "${HEALTHCHECK_URL}") bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
+    "REMOTE_APP_DIR=$(printf '%q' "${REMOTE_APP_DIR}") PM2_APP=$(printf '%q' "${PM2_APP}") GIT_BRANCH=$(printf '%q' "${GIT_BRANCH}") REMOTE_NODE_BIN=$(printf '%q' "${REMOTE_NODE_BIN}") STOP_ALL_PM2=$(printf '%q' "${STOP_ALL_PM2}") PREFLIGHT_TYPECHECK=$(printf '%q' "${PREFLIGHT_TYPECHECK}") HEALTHCHECK_URL=$(printf '%q' "${HEALTHCHECK_URL}") RUN_PRISMA_MIGRATIONS=$(printf '%q' "${RUN_PRISMA_MIGRATIONS}") bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
 }
 
 run_via_plink() {
@@ -186,7 +196,7 @@ run_via_plink() {
   fi
 
   printf 'y\n' | "${plink_bin}" -ssh -P "${SSH_PORT}" -pw "${SSH_PASSWORD}" "${TARGET}" \
-    "REMOTE_APP_DIR=$(printf '%q' "${REMOTE_APP_DIR}") PM2_APP=$(printf '%q' "${PM2_APP}") GIT_BRANCH=$(printf '%q' "${GIT_BRANCH}") REMOTE_NODE_BIN=$(printf '%q' "${REMOTE_NODE_BIN}") STOP_ALL_PM2=$(printf '%q' "${STOP_ALL_PM2}") PREFLIGHT_TYPECHECK=$(printf '%q' "${PREFLIGHT_TYPECHECK}") HEALTHCHECK_URL=$(printf '%q' "${HEALTHCHECK_URL}") bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
+    "REMOTE_APP_DIR=$(printf '%q' "${REMOTE_APP_DIR}") PM2_APP=$(printf '%q' "${PM2_APP}") GIT_BRANCH=$(printf '%q' "${GIT_BRANCH}") REMOTE_NODE_BIN=$(printf '%q' "${REMOTE_NODE_BIN}") STOP_ALL_PM2=$(printf '%q' "${STOP_ALL_PM2}") PREFLIGHT_TYPECHECK=$(printf '%q' "${PREFLIGHT_TYPECHECK}") HEALTHCHECK_URL=$(printf '%q' "${HEALTHCHECK_URL}") RUN_PRISMA_MIGRATIONS=$(printf '%q' "${RUN_PRISMA_MIGRATIONS}") bash -lc $(printf '%q' "${REMOTE_SCRIPT}")"
 }
 
 if [[ -n "${SSH_PASSWORD}" ]]; then

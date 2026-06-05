@@ -6,7 +6,7 @@ import { ChartBarIcon, ClockIcon, HomeIcon, PlayIcon, UserGroupIcon } from "@her
 
 const links = [
 	{ href: "/", label: "Clubhouse", icon: HomeIcon },
-	{ href: "/rounds/new", label: "Start Round", icon: PlayIcon },
+	{ href: "/rounds/new", label: "Start", icon: PlayIcon },
 	{ href: "/friends", label: "Friends", icon: UserGroupIcon },
 	{ href: "/rounds/history", label: "History", icon: ClockIcon },
 	{ href: "/stats", label: "My Stats", icon: ChartBarIcon },
