@@ -1,4 +1,4 @@
-import { Round, RoundStatus } from "@prisma/client";
+import { HoleEntry, Round, RoundStatus } from "@prisma/client";
 
 export interface FriendProfileView {
 	friendUserId: string;
@@ -15,7 +15,13 @@ export interface FriendOverallStatsView {
 	roundsPlayed: number;
 	holesPlayed: number;
 	totalStrokes: number;
+	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalOnePutts: number;
+	totalTwoPutts: number;
+	totalThreePutts: number;
+	totalFourPlusPutts: number;
+	totalGir: number;
 	averagePuttsPerHole: number;
 	totalBirdies: number;
 	totalPars: number;
@@ -39,6 +45,20 @@ export interface FriendRoundSummaryView {
 	totalTripleBogeyPlus: number;
 }
 
+export interface FriendHoleEntryView {
+	holeSequence: number;
+	baseHoleId: number;
+	strokes: number;
+	penalties: number;
+	bunkers: number;
+	putts: number;
+	greenInRegulation: boolean;
+}
+
+export interface FriendRoundDetailView extends FriendRoundSummaryView {
+	holeEntries: FriendHoleEntryView[];
+}
+
 type FriendRoundSource = Pick<
 	Round,
 	| "id"
@@ -54,6 +74,19 @@ type FriendRoundSource = Pick<
 	| "totalDoubleBogeys"
 	| "totalTripleBogeyPlus"
 >;
+
+type FriendRoundDetailSource = FriendRoundSource & {
+	holeEntries: Array<Pick<
+		HoleEntry,
+		| "holeSequence"
+		| "baseHoleId"
+		| "strokes"
+		| "penalties"
+		| "bunkers"
+		| "putts"
+		| "greenInRegulation"
+	>>;
+};
 
 function displayNameOrFallback( name: string | null | undefined ) {
 	const value = name?.trim();
@@ -79,7 +112,13 @@ export function toFriendOverallStatsView( stats: {
 	roundsPlayed: number;
 	holesPlayed: number;
 	totalStrokes: number;
+	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalOnePutts: number;
+	totalTwoPutts: number;
+	totalThreePutts: number;
+	totalFourPlusPutts: number;
+	totalGir: number;
 	averagePuttsPerHole: number;
 	totalBirdies: number;
 	totalPars: number;
@@ -91,7 +130,13 @@ export function toFriendOverallStatsView( stats: {
 		roundsPlayed: stats.roundsPlayed,
 		holesPlayed: stats.holesPlayed,
 		totalStrokes: stats.totalStrokes,
+		bestRoundSixHoles: stats.bestRoundSixHoles,
 		totalPutts: stats.totalPutts,
+		totalOnePutts: stats.totalOnePutts,
+		totalTwoPutts: stats.totalTwoPutts,
+		totalThreePutts: stats.totalThreePutts,
+		totalFourPlusPutts: stats.totalFourPlusPutts,
+		totalGir: stats.totalGir,
 		averagePuttsPerHole: stats.averagePuttsPerHole,
 		totalBirdies: stats.totalBirdies,
 		totalPars: stats.totalPars,
@@ -115,5 +160,20 @@ export function toFriendRoundSummaryView( round: FriendRoundSource ): FriendRoun
 		totalBogeys: round.totalBogeys,
 		totalDoubleBogeys: round.totalDoubleBogeys,
 		totalTripleBogeyPlus: round.totalTripleBogeyPlus,
+	};
+}
+
+export function toFriendRoundDetailView( round: FriendRoundDetailSource ): FriendRoundDetailView {
+	return {
+		...toFriendRoundSummaryView( round ),
+		holeEntries: round.holeEntries.map( ( entry ) => ( {
+			holeSequence: entry.holeSequence,
+			baseHoleId: entry.baseHoleId,
+			strokes: entry.strokes,
+			penalties: entry.penalties,
+			bunkers: entry.bunkers,
+			putts: entry.putts,
+			greenInRegulation: entry.greenInRegulation,
+		} ) ),
 	};
 }

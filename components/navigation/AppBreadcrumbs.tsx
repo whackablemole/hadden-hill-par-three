@@ -81,6 +81,9 @@ function getSegmentLabel( segment: string, allSegments: string[] ) {
 	if ( allSegments[ 0 ] === "friends" && allSegments[ 1 ] === segment ) {
 		return "Friend";
 	}
+	if ( allSegments[ 0 ] === "friends" && allSegments[ 2 ] === "rounds" && allSegments[ 3 ] === segment ) {
+		return "Round";
+	}
 	if ( allSegments[ 0 ] === "rounds" && allSegments[ 1 ] === segment && !staticRoundsSegments.has( segment ) ) {
 		return "Round";
 	}
@@ -151,7 +154,7 @@ export function AppBreadcrumbs() {
 					const label = currentIsRoundIdSegment && roundDateLabel ? roundDateLabel : getSegmentLabel( segment, segments );
 					const isLast = index === segments.length - 1;
 					return (
-						<div className="contents" key={ href }>
+						<div className="contents" key={ `${ index }-${ segment }-${ href }` }>
 							<BreadcrumbSeparator />
 							<BreadcrumbItem>
 								{ isLast ? (

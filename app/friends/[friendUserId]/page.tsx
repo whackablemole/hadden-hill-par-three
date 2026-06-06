@@ -17,7 +17,13 @@ interface FriendOverallStats {
 	roundsPlayed: number;
 	holesPlayed: number;
 	totalStrokes: number;
+	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalOnePutts: number;
+	totalTwoPutts: number;
+	totalThreePutts: number;
+	totalFourPlusPutts: number;
+	totalGir: number;
 	averagePuttsPerHole: number;
 	totalBirdies: number;
 	totalPars: number;
@@ -45,8 +51,13 @@ type AccessState = "not-friend" | "not-found" | "error" | null;
 
 function FriendDetailSkeleton() {
 	return (
-		<main className="mx-auto max-w-4xl space-y-4 p-6" aria-hidden="true">
+		<main className="mx-auto max-w-3xl space-y-4 p-6" aria-hidden="true">
 			<Skeleton className="h-8 w-56" />
+			<div className="grid grid-cols-2 gap-3">
+				{ Array.from( { length: 6 }, ( _, index ) => (
+					<Skeleton className="h-24 w-full" key={ index } />
+				) ) }
+			</div>
 			<Skeleton className="h-32 w-full" />
 			<Skeleton className="h-40 w-full" />
 		</main>
@@ -139,7 +150,7 @@ export default function FriendDetailPage() {
 	if ( !session?.user ) {
 		const callbackUrl = typeof window !== "undefined" ? window.location.origin : undefined;
 		return (
-			<main className="mx-auto max-w-4xl p-6">
+			<main className="mx-auto max-w-3xl p-6">
 				<h1 className="text-2xl font-bold">Friend details</h1>
 				<p className="mt-2 text-slate-700">Sign in to view friend scores.</p>
 				<button
@@ -155,7 +166,7 @@ export default function FriendDetailPage() {
 
 	if ( accessState ) {
 		return (
-			<main className="mx-auto max-w-4xl p-6">
+			<main className="mx-auto max-w-3xl p-6">
 				<h1 className="text-2xl font-bold">Friend details</h1>
 				<div className="mt-4">
 					<FriendAccessState status={ accessState } />
@@ -166,7 +177,7 @@ export default function FriendDetailPage() {
 
 	if ( !profile || !stats ) {
 		return (
-			<main className="mx-auto max-w-4xl p-6">
+			<main className="mx-auto max-w-3xl p-6">
 				<h1 className="text-2xl font-bold">Friend details</h1>
 				<div className="mt-4">
 					<FriendAccessState status="error" />
@@ -176,10 +187,12 @@ export default function FriendDetailPage() {
 	}
 
 	return (
-		<main className="mx-auto max-w-4xl space-y-4 p-6">
-			<h1 className="text-2xl font-bold">{ profile.displayName }</h1>
+		<main className="mx-auto max-w-3xl p-6">
+			<h1 className="text-2xl font-bold">{ profile.displayName } stats</h1>
 			<FriendStatsPanel stats={ stats } />
-			<FriendRoundsHistory rounds={ rounds } />
+			<section className="mt-6">
+				<FriendRoundsHistory friendUserId={ friendUserId } rounds={ rounds } />
+			</section>
 		</main>
 	);
 }
