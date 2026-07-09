@@ -17,6 +17,7 @@ interface HoleStats {
 		tripleBogeyPlus: number;
 	};
 	puttBreakdown: {
+		chipIns: number;
 		onePutts: number;
 		twoPutts: number;
 		threePutts: number;
@@ -57,6 +58,7 @@ const normalizeHoleStats = ( data: unknown, fallbackHole: number ): HoleStats | 
 			tripleBogeyPlus: numberOrZero( rawScore.tripleBogeyPlus ),
 		},
 		puttBreakdown: {
+			chipIns: numberOrZero( rawPutt.chipIns ),
 			onePutts: numberOrZero( rawPutt.onePutts ),
 			twoPutts: numberOrZero( rawPutt.twoPutts ),
 			threePutts: numberOrZero( rawPutt.threePutts ),
@@ -160,6 +162,7 @@ export default function HoleStatsPage() {
 	];
 
 	const puttBreakdown = [
+		{ label: "Chip ins", value: stats.puttBreakdown.chipIns },
 		{ label: "One putts", value: stats.puttBreakdown.onePutts },
 		{ label: "Two putts", value: stats.puttBreakdown.twoPutts },
 		{ label: "Three putts", value: stats.puttBreakdown.threePutts },

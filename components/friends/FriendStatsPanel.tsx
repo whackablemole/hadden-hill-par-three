@@ -6,6 +6,7 @@ interface FriendOverallStats {
 	totalStrokes: number;
 	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalChipIns: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
 	totalThreePutts: number;
@@ -54,6 +55,7 @@ export function FriendStatsPanel( { stats }: FriendStatsPanelProps ) {
 	];
 
 	const puttBreakdown = [
+		{ label: "Chip ins", value: stats.totalChipIns, progressPercent: holePercentage( stats.totalChipIns ) },
 		{ label: "One putts", value: stats.totalOnePutts, progressPercent: holePercentage( stats.totalOnePutts ) },
 		{ label: "Two putts", value: stats.totalTwoPutts, progressPercent: holePercentage( stats.totalTwoPutts ) },
 		{ label: "Three putts", value: stats.totalThreePutts, progressPercent: holePercentage( stats.totalThreePutts ) },

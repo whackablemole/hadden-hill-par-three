@@ -103,7 +103,9 @@ export function RoundSummaryCard( { round, compact = false, hideHeader = false }
 	const puttBuckets = ( round.holeEntries ?? [] ).reduce(
 		( totals, entry ) => {
 			const putts = typeof entry.putts === "number" ? entry.putts : 0;
-			if ( putts <= 1 ) {
+			if ( putts === 0 ) {
+				totals.chipIn += 1;
+			} else if ( putts === 1 ) {
 				totals.one += 1;
 			} else if ( putts === 2 ) {
 				totals.two += 1;
@@ -114,9 +116,10 @@ export function RoundSummaryCard( { round, compact = false, hideHeader = false }
 			}
 			return totals;
 		},
-		{ one: 0, two: 0, three: 0, fourPlus: 0 },
+		{ chipIn: 0, one: 0, two: 0, three: 0, fourPlus: 0 },
 	);
 	const puttTypeStats = [
+		{ label: "Chip ins", value: puttBuckets.chipIn, progressPercent: holePercentage( puttBuckets.chipIn ) },
 		{ label: "One putts", value: puttBuckets.one, progressPercent: holePercentage( puttBuckets.one ) },
 		{ label: "Two putts", value: puttBuckets.two, progressPercent: holePercentage( puttBuckets.two ) },
 		{ label: "Three putts", value: puttBuckets.three, progressPercent: holePercentage( puttBuckets.three ) },

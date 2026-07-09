@@ -19,6 +19,7 @@ interface FriendOverallStats {
 	totalStrokes: number;
 	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalChipIns: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
 	totalThreePutts: number;

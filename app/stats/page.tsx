@@ -13,6 +13,7 @@ interface OverallStats {
 	totalStrokes: number;
 	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalChipIns: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
 	totalThreePutts: number;
@@ -74,6 +75,7 @@ const normalizeStats = ( data: unknown ): OverallStats | null => {
 		totalStrokes: numberOrZero( raw.totalStrokes ),
 		bestRoundSixHoles: numberOrNull( raw.bestRoundSixHoles ),
 		totalPutts: numberOrZero( raw.totalPutts ),
+		totalChipIns: numberOrZero( raw.totalChipIns ),
 		totalOnePutts: numberOrZero( raw.totalOnePutts ),
 		totalTwoPutts: numberOrZero( raw.totalTwoPutts ),
 		totalThreePutts: numberOrZero( raw.totalThreePutts ?? raw.totalThreePuttPlus ?? raw.totalThreePuttsOnly ),
@@ -242,6 +244,7 @@ export default function StatsPage() {
 	];
 
 	const puttBreakdown = [
+		{ label: "Chip ins", value: stats.totalChipIns, progressPercent: holePercentage( stats.totalChipIns ) },
 		{ label: "One putts", value: stats.totalOnePutts, progressPercent: holePercentage( stats.totalOnePutts ) },
 		{ label: "Two putts", value: stats.totalTwoPutts, progressPercent: holePercentage( stats.totalTwoPutts ) },
 		{ label: "Three putts", value: stats.totalThreePutts, progressPercent: holePercentage( stats.totalThreePutts ) },

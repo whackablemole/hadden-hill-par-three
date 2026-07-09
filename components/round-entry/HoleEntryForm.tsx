@@ -52,6 +52,7 @@ export function HoleEntryForm( { initialPayload, onSave }: HoleEntryFormProps ) 
 		value: number,
 		min: number,
 		onChange: ( nextValue: number ) => void,
+		zeroLabel?: string,
 	) {
 		return (
 			<div className="rounded border border-slate-200 px-3 py-2">
@@ -78,6 +79,9 @@ export function HoleEntryForm( { initialPayload, onSave }: HoleEntryFormProps ) 
 						<PlusIcon className="h-5 w-5" />
 					</button>
 				</div>
+				{ zeroLabel && value === 0 ? (
+					<p className="mt-2 text-center text-sm font-semibold text-teal-700">{ zeroLabel }</p>
+				) : null }
 			</div>
 		);
 	}
@@ -86,7 +90,7 @@ export function HoleEntryForm( { initialPayload, onSave }: HoleEntryFormProps ) 
 		<form className="grid gap-3 rounded border border-slate-200 bg-white p-4" onSubmit={ submit }>
 			<div className="grid gap-2">
 				{ renderStepper( "Strokes", form.strokes, 1, ( nextValue ) => setForm( { ...form, strokes: nextValue } ) ) }
-				{ renderStepper( "Putts", form.putts, 0, ( nextValue ) => setForm( { ...form, putts: nextValue } ) ) }
+				{ renderStepper( "Putts", form.putts, 0, ( nextValue ) => setForm( { ...form, putts: nextValue } ), "Chip in!" ) }
 			</div>
 			<div className="grid gap-2">
 				{ renderToggle( "Penalty", form.penalties, ( checked ) => setForm( { ...form, penalties: checked } ) ) }

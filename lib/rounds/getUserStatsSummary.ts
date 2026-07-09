@@ -6,6 +6,7 @@ interface UserStatsSummary {
 	totalStrokes: number;
 	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalChipIns: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
 	totalThreePutts: number;
@@ -71,6 +72,7 @@ export async function getUserStatsSummary( userId: string ): Promise<UserStatsSu
 		},
 	} );
 
+	const totalChipIns = holeEntries.filter( ( entry ) => entry.putts === 0 ).length;
 	const totalOnePutts = holeEntries.filter( ( entry ) => entry.putts === 1 ).length;
 	const totalTwoPutts = holeEntries.filter( ( entry ) => entry.putts === 2 ).length;
 	const totalThreePutts = holeEntries.filter( ( entry ) => entry.putts === 3 ).length;
@@ -140,6 +142,7 @@ export async function getUserStatsSummary( userId: string ): Promise<UserStatsSu
 		totalStrokes,
 		bestRoundSixHoles,
 		totalPutts,
+		totalChipIns,
 		totalOnePutts,
 		totalTwoPutts,
 		totalThreePutts,

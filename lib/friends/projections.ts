@@ -17,6 +17,7 @@ export interface FriendOverallStatsView {
 	totalStrokes: number;
 	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalChipIns: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
 	totalThreePutts: number;
@@ -114,6 +115,7 @@ export function toFriendOverallStatsView( stats: {
 	totalStrokes: number;
 	bestRoundSixHoles: number | null;
 	totalPutts: number;
+	totalChipIns: number;
 	totalOnePutts: number;
 	totalTwoPutts: number;
 	totalThreePutts: number;
@@ -132,6 +134,7 @@ export function toFriendOverallStatsView( stats: {
 		totalStrokes: stats.totalStrokes,
 		bestRoundSixHoles: stats.bestRoundSixHoles,
 		totalPutts: stats.totalPutts,
+		totalChipIns: stats.totalChipIns,
 		totalOnePutts: stats.totalOnePutts,
 		totalTwoPutts: stats.totalTwoPutts,
 		totalThreePutts: stats.totalThreePutts,

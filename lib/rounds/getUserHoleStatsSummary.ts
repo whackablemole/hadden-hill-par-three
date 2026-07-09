@@ -12,6 +12,7 @@ export interface HoleStatsSummary {
 		tripleBogeyPlus: number;
 	};
 	puttBreakdown: {
+		chipIns: number;
 		onePutts: number;
 		twoPutts: number;
 		threePutts: number;
@@ -49,6 +50,7 @@ export async function getUserHoleStatsSummary( userId: string, hole: number ): P
 			tripleBogeyPlus: 0,
 		},
 		puttBreakdown: {
+			chipIns: 0,
 			onePutts: 0,
 			twoPutts: 0,
 			threePutts: 0,
@@ -72,7 +74,9 @@ export async function getUserHoleStatsSummary( userId: string, hole: number ): P
 			summary.scoreBreakdown.tripleBogeyPlus += 1;
 		}
 
-		if ( entry.putts <= 1 ) {
+		if ( entry.putts === 0 ) {
+			summary.puttBreakdown.chipIns += 1;
+		} else if ( entry.putts === 1 ) {
 			summary.puttBreakdown.onePutts += 1;
 		} else if ( entry.putts === 2 ) {
 			summary.puttBreakdown.twoPutts += 1;
