@@ -340,7 +340,7 @@ export default function StatsPage() {
 
 			<section className="mt-4 rounded border border-slate-200 bg-white p-4">
 				<div className="flex flex-wrap items-center justify-between gap-2">
-					<h2 className="text-lg font-semibold">Optimum round target</h2>
+					<h2 className="text-lg font-semibold">Optimum round</h2>
 					<p className="text-sm text-slate-700">
 						Total: <span className="font-semibold text-slate-900">{ stats.optimumRound.totalStrokes ?? "-" }</span>
 					</p>
