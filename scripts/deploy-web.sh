@@ -49,7 +49,7 @@ SSH_PORT="${SSH_PORT:-22}"
 SSH_PASSWORD="${SSH_PASSWORD:-}"
 
 REMOTE_APP_DIR="${REMOTE_APP_DIR:-/home/whackablemole/apps/hadden-hill-par-three}"
-PM2_APP="${PM2_APP:-6}"
+PM2_APP="${PM2_APP:-hadden-hill-par-three}"
 GIT_BRANCH="${GIT_BRANCH:-main}"
 REMOTE_NODE_BIN="${REMOTE_NODE_BIN:-/home/whackablemole/.nvm/versions/node/v20.20.2/bin/node}"
 STOP_ALL_PM2="${STOP_ALL_PM2:-false}"
