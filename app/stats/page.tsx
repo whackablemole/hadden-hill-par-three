@@ -26,6 +26,8 @@ interface OverallStats {
 	totalBogeys: number;
 	totalDoubleBogeys: number;
 	totalTripleBogeyPlus: number;
+	holesSinceLastThreePutt: number | null;
+	holesSinceLastDoubleBogeyPlus: number | null;
 	mostFrequentScoreByHole: Array<{
 		hole: number;
 		score: number | null;
@@ -88,6 +90,8 @@ const normalizeStats = ( data: unknown ): OverallStats | null => {
 		totalBogeys: numberOrZero( raw.totalBogeys ),
 		totalDoubleBogeys: numberOrZero( raw.totalDoubleBogeys ),
 		totalTripleBogeyPlus: numberOrZero( raw.totalTripleBogeyPlus ),
+		holesSinceLastThreePutt: numberOrNull( raw.holesSinceLastThreePutt ),
+		holesSinceLastDoubleBogeyPlus: numberOrNull( raw.holesSinceLastDoubleBogeyPlus ),
 		mostFrequentScoreByHole: Array.isArray( raw.mostFrequentScoreByHole )
 			? raw.mostFrequentScoreByHole.map( ( item, index ) => {
 				const value = ( item && typeof item === "object" ? item : {} ) as Record<string, unknown>;
@@ -145,7 +149,7 @@ function StatsPageSkeleton() {
 		<main className="mx-auto max-w-3xl p-6" aria-hidden="true">
 			<Skeleton className="h-8 w-32" />
 			<div className="mt-4 grid grid-cols-2 gap-3">
-				{ Array.from( { length: 6 }, ( _, index ) => (
+				{ Array.from( { length: 8 }, ( _, index ) => (
 					<article className="rounded border border-slate-200 bg-white p-4" key={ index }>
 						<Skeleton className="h-4 w-20" />
 						<Skeleton className="mt-2 h-7 w-14" />
@@ -233,6 +237,8 @@ export default function StatsPage() {
 		{ label: "Average round (6 holes)", value: Math.round( averageRoundSixHoles ) },
 		{ label: "Putts per hole", value: stats.averagePuttsPerHole.toFixed( 2 ) },
 		{ label: "GIR", value: stats.totalGir, progressPercent: holePercentage( stats.totalGir ) },
+		{ label: "Holes since last 3 putt", value: stats.holesSinceLastThreePutt ?? "-" },
+		{ label: "Holes since last 5+", value: stats.holesSinceLastDoubleBogeyPlus ?? "-" },
 	];
 
 	const scoreBreakdown = [

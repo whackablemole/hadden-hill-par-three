@@ -17,6 +17,8 @@ interface HomeStats {
 	totalPars: number;
 	totalGir: number;
 	girPercentage: number;
+	holesSinceLastThreePutt: number | null;
+	holesSinceLastDoubleBogeyPlus: number | null;
 }
 
 interface HomeStatsResponse {
@@ -44,6 +46,8 @@ const EMPTY_STATS: HomeStats = {
 	totalPars: 0,
 	totalGir: 0,
 	girPercentage: 0,
+	holesSinceLastThreePutt: null,
+	holesSinceLastDoubleBogeyPlus: null,
 };
 
 function formatGir( totalGir: number, girPercentage: number ) {
@@ -118,6 +122,11 @@ export default function HomePage() {
 			.finally( () => setLoadingRecentRounds( false ) );
 	}, [ session?.user ] );
 
+	const holesSinceStatCards = [
+		{ label: "Holes since last 3 putt", value: stats.holesSinceLastThreePutt ?? "-" },
+		{ label: "Holes since last 5+", value: stats.holesSinceLastDoubleBogeyPlus ?? "-" },
+	];
+
 	const statCards = scope === "last-round"
 		? [
 			{ label: "Total holes", value: stats.holesPlayed },
@@ -126,6 +135,7 @@ export default function HomePage() {
 			{ label: "Total pars", value: stats.totalPars },
 			{ label: "Par relative", value: formatParRelative( stats.totalStrokes, stats.holesPlayed ) },
 			{ label: "GIR", value: formatGir( stats.totalGir, stats.girPercentage ) },
+			...holesSinceStatCards,
 		]
 		: [
 			{ label: "Total rounds", value: stats.totalRounds },
@@ -134,6 +144,7 @@ export default function HomePage() {
 			{ label: "Average round (6 holes)", value: stats.holesPlayed <= 0 ? "-" : Math.round( ( stats.totalStrokes / stats.holesPlayed ) * 6 ) },
 			{ label: "Average putts", value: stats.averagePuttsPerHole.toFixed( 2 ) },
 			{ label: "GIR", value: formatGir( stats.totalGir, stats.girPercentage ) },
+			...holesSinceStatCards,
 		];
 
 	const dateFormatter = new Intl.DateTimeFormat( "en-US", {
@@ -193,7 +204,7 @@ export default function HomePage() {
 					<>
 						{ loadingStats ? (
 							<div className="mt-4 grid grid-cols-2 gap-3">
-								{ Array.from( { length: 6 }, ( _, index ) => (
+								{ Array.from( { length: 8 }, ( _, index ) => (
 									<article className="rounded border border-slate-200 p-3" key={ index }>
 										<Skeleton className="h-3 w-20" />
 										<Skeleton className="mt-2 h-6 w-14" />

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { getHolesSinceStats } from "@/lib/rounds/getHolesSinceStats";
 
 interface UserStatsSummary {
 	roundsPlayed: number;
@@ -19,6 +20,8 @@ interface UserStatsSummary {
 	totalBogeys: number;
 	totalDoubleBogeys: number;
 	totalTripleBogeyPlus: number;
+	holesSinceLastThreePutt: number | null;
+	holesSinceLastDoubleBogeyPlus: number | null;
 	mostFrequentScoreByHole: Array<{
 		hole: number;
 		score: number | null;
@@ -136,6 +139,8 @@ export async function getUserStatsSummary( userId: string ): Promise<UserStatsSu
 		? null
 		: optimumRoundHoles.reduce( ( sum, hole ) => sum + ( hole.bestScore ?? 0 ), 0 );
 
+	const { holesSinceLastThreePutt, holesSinceLastDoubleBogeyPlus } = await getHolesSinceStats( userId );
+
 	return {
 		roundsPlayed,
 		holesPlayed,
@@ -155,6 +160,8 @@ export async function getUserStatsSummary( userId: string ): Promise<UserStatsSu
 		totalBogeys: rounds.reduce( ( sum, r ) => sum + r.totalBogeys, 0 ),
 		totalDoubleBogeys: rounds.reduce( ( sum, r ) => sum + r.totalDoubleBogeys, 0 ),
 		totalTripleBogeyPlus: rounds.reduce( ( sum, r ) => sum + r.totalTripleBogeyPlus, 0 ),
+		holesSinceLastThreePutt,
+		holesSinceLastDoubleBogeyPlus,
 		mostFrequentScoreByHole,
 		optimumRound: {
 			holes: optimumRoundHoles,

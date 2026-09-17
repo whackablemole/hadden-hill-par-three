@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { errorResponse } from "@/lib/rounds/http";
 import { getAuthenticatedUser } from "@/lib/rounds/ownership";
+import { getHolesSinceStats } from "@/lib/rounds/getHolesSinceStats";
 
 type Scope = "lifetime" | "last-round";
 
@@ -15,6 +16,8 @@ interface HomeStats {
 	totalPars: number;
 	totalGir: number;
 	girPercentage: number;
+	holesSinceLastThreePutt: number | null;
+	holesSinceLastDoubleBogeyPlus: number | null;
 }
 
 function calculateGirPercentage( totalGir: number, holesPlayed: number ) {
@@ -64,6 +67,8 @@ export async function GET( request: NextRequest ) {
 			totalPars: 0,
 			totalGir: 0,
 			girPercentage: 0,
+			holesSinceLastThreePutt: null,
+			holesSinceLastDoubleBogeyPlus: null,
 		};
 		return NextResponse.json( { scope, stats: emptyStats } );
 	}
@@ -97,6 +102,8 @@ export async function GET( request: NextRequest ) {
 		? Math.min( ...sixHoleRoundsForScope.map( ( round ) => round.totalStrokes ) )
 		: null;
 
+	const { holesSinceLastThreePutt, holesSinceLastDoubleBogeyPlus } = await getHolesSinceStats( user.id );
+
 	const stats: HomeStats = {
 		totalRounds,
 		holesPlayed,
@@ -107,6 +114,8 @@ export async function GET( request: NextRequest ) {
 		totalPars,
 		totalGir,
 		girPercentage: calculateGirPercentage( totalGir, holesPlayed ),
+		holesSinceLastThreePutt,
+		holesSinceLastDoubleBogeyPlus,
 	};
 
 	return NextResponse.json( { scope, stats } );
